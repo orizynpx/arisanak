@@ -9,7 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
@@ -57,7 +58,15 @@ fun MainNavigationShell(viewModel: ArisanViewModel) {
                     ) {
                         NavigationBarItem(
                             selected = currentRoute == "home",
-                            onClick = { navController.navigate("home") { popUpTo(0) } },
+                            onClick = {
+                                navController.navigate("home") {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
                             icon = {
                                 Icon(
                                     imageVector = if (currentRoute == "home") Icons.Default.Home else Icons.Outlined.Home,
@@ -77,7 +86,15 @@ fun MainNavigationShell(viewModel: ArisanViewModel) {
 
                         NavigationBarItem(
                             selected = currentRoute == "groups",
-                            onClick = { navController.navigate("groups") { popUpTo(0) } },
+                            onClick = {
+                                navController.navigate("groups") {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
                             icon = {
                                 Icon(
                                     imageVector = if (currentRoute == "groups") Icons.Default.Groups else Icons.Outlined.Groups,
@@ -97,7 +114,15 @@ fun MainNavigationShell(viewModel: ArisanViewModel) {
 
                         NavigationBarItem(
                             selected = currentRoute == "profil",
-                            onClick = { navController.navigate("profil") { popUpTo(0) } },
+                            onClick = {
+                                navController.navigate("profil") {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
                             icon = {
                                 Icon(
                                     imageVector = if (currentRoute == "profil") Icons.Default.Person else Icons.Outlined.Person,

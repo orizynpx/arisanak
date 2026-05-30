@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,7 +30,6 @@ import io.github.naupyon.arisanak.presentation.ui.theme.*
 import io.github.naupyon.arisanak.presentation.ui.components.QuickLogPaymentDialog
 import androidx.compose.ui.text.style.TextOverflow
 import java.util.Locale
-import androidx.compose.ui.platform.LocalLocale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +41,7 @@ fun HomeScreen(
     val groups by viewModel.groupsUiState.collectAsState()
     val totalPiutang by viewModel.totalPiutangBalance.collectAsState()
     val transactionHistory by viewModel.transactionHistory.collectAsState()
+    val locale = LocalConfiguration.current.locales[0]
 
     var showQuickLogSheet by remember { mutableStateOf(false) }
 
@@ -136,7 +137,7 @@ fun HomeScreen(
                                 )
                             }
                             Text(
-                                  text = String.format(LocalLocale.current.platformLocale, "Rp %,.0f", totalPiutang),
+                                  text = String.format(locale, "Rp %,.0f", totalPiutang),
                                   style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
                                   color = RoseRed
                             )
@@ -306,7 +307,7 @@ fun HomeScreen(
                                 }
                             }
                             Column(horizontalAlignment = Alignment.End) {
-                                Text(text = String.format(LocalLocale.current.platformLocale, "Rp %,.0f", item.amount), fontWeight = FontWeight.Bold, color = if (item.isDitalangi) AlertError else RoseRed)
+                                Text(text = String.format(locale, "Rp %,.0f", item.amount), fontWeight = FontWeight.Bold, color = if (item.isDitalangi) AlertError else RoseRed)
                                 if (item.isDitalangi) {
                                     Box(modifier = Modifier.clip(CircleShape).background(AlertError.copy(alpha = 0.1f)).padding(horizontal = 6.dp, vertical = 2.dp)) {
                                         Text("DITALANGI", color = AlertError, fontSize = 8.sp, fontWeight = FontWeight.Bold)

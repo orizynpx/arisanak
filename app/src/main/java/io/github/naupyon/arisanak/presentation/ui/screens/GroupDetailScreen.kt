@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -43,7 +44,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.random.Random
-import androidx.compose.ui.platform.LocalLocale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +53,7 @@ fun GroupDetailScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val locale = LocalConfiguration.current.locales[0]
     val groups by viewModel.groupsUiState.collectAsState()
     val groupState = groups.find { it.group.id == groupId }
     val intervals by viewModel.getIntervalsForGroup(groupId).collectAsState(initial = emptyList())
@@ -106,13 +107,13 @@ fun GroupDetailScreen(
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                TabRow(
+                SecondaryTabRow(
                     selectedTabIndex = activeTabIdx,
                     containerColor = Color.Transparent,
                     contentColor = RoseRed,
-                    indicator = { tabPositions ->
+                    indicator = {
                         TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[activeTabIdx]),
+                            modifier = Modifier.tabIndicatorOffset(activeTabIdx),
                             color = RoseRed
                         )
                     }
@@ -141,7 +142,7 @@ fun GroupDetailScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = "Iuran Dasar", style = MaterialTheme.typography.bodySmall, color = OnRoseContainer)
                                     Text(
-                                        text = String.format(LocalLocale.current.platformLocale, "Rp %,.0f", groupState.group.baseDueAmount),
+                                        text = String.format(locale, "Rp %,.0f", groupState.group.baseDueAmount),
                                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                         color = RoseRed
                                     )
@@ -150,7 +151,7 @@ fun GroupDetailScreen(
                                 Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f)) {
                                     Text(text = "Total Pot", style = MaterialTheme.typography.bodySmall, color = OnRoseContainer)
                                     Text(
-                                        text = String.format(LocalLocale.current.platformLocale, "Rp %,.0f", groupState.targetPot),
+                                        text = String.format(locale, "Rp %,.0f", groupState.targetPot),
                                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                         color = RoseRed
                                     )
@@ -376,6 +377,7 @@ fun GroupDetailScreen(
 
 @Composable
 fun RosterRowItem(item: MemberPaymentState, onClick: () -> Unit, onSendReminder: () -> Unit) {
+    val locale = LocalConfiguration.current.locales[0]
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = WarmSurface),
@@ -386,7 +388,7 @@ fun RosterRowItem(item: MemberPaymentState, onClick: () -> Unit, onSendReminder:
                 Text(text = item.member.displayName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                 val statusText = when(item.state) {
                     PaymentState.PAID -> "Lunas"
-                    PaymentState.PARTIAL -> "Sisa Rp ${String.format(LocalLocale.current.platformLocale, "%,.0f", item.sisa)}"
+                    PaymentState.PARTIAL -> "Sisa Rp ${String.format(locale, "%,.0f", item.sisa)}"
                     PaymentState.DITALANGI -> "Ditalangi"
                     PaymentState.UNPAID -> "Belum Bayar"
                 }
