@@ -1,0 +1,407 @@
+package io.github.naupyon.arisanak.presentation.ui.components
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import io.github.naupyon.arisanak.domain.model.ArisanFrequency
+import io.github.naupyon.arisanak.presentation.ui.theme.*
+import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
+import io.github.naupyon.arisanak.presentation.viewmodel.MemberPaymentState
+import io.github.naupyon.arisanak.presentation.viewmodel.PaymentState
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun CreateGroupDialog(
+    onDismiss: () -> Unit,
+    onCreate: (String, ArisanFrequency, Double, List<Pair<String, String?>>) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var baseDueStr by remember { mutableStateOf("") }
+    var selectedFreq by remember { mutableStateOf<ArisanFrequency?>(null) }
+    var freshMemberName by remember { mutableStateOf("") }
+    var freshMemberPhone by remember { mutableStateOf("") }
+    val membersList = remember { mutableStateListOf<Pair<String, String?>>() }
+    val focusManager = LocalFocusManager.current
+
+    val context = LocalContext.current
+    val contactPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickContact()
+    ) { uri ->
+        if (uri != null) {
+            parseContactResult(context, uri)?.let { membersList.add(it) }
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        containerColor = WarmBackground
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(text = "Buat Kelompok Baru", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = RoseRed)
+
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = "Langkah 1: Nama Kelompok Arisan", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                OutlinedTextField(
+                    value = name, onValueChange = { name = it }, placeholder = { Text("cth: Arisan Keluarga") }, singleLine = true, 
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+            }
+
+            val isStepOneDone = name.trim().length >= 3
+            AnimatedVisibility(visible = isStepOneDone) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    Text(text = "Langkah 2: Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        ArisanFrequency.entries.forEach { freq ->
+                            val isSel = freq == selectedFreq
+                            Box(
+                                modifier = Modifier.weight(1f).clip(CircleShape).background(if (isSel) RoseRed else DividerVariant.copy(alpha = 0.2f)).clickable { selectedFreq = freq }.padding(vertical = 10.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = freq.name, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (isSel) Color.White else OnRoseContainer)
+                            }
+                        }
+                    }
+                }
+            }
+
+            val isStepTwoDone = isStepOneDone && selectedFreq != null
+            AnimatedVisibility(visible = isStepTwoDone) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    Text(text = "Langkah 3: Jumlah Iuran Dasar", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    OutlinedTextField(
+                        value = baseDueStr, onValueChange = { baseDueStr = it }, prefix = { Text("Rp ") }, 
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next), 
+                        modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), singleLine = true
+                    )
+                }
+            }
+
+            val isStepThreeDone = isStepTwoDone && baseDueStr.toDoubleOrNull() != null
+            AnimatedVisibility(visible = isStepThreeDone) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    Text(text = "Langkah 4: Tambahkan Anggota (${membersList.size})", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = freshMemberName, onValueChange = { freshMemberName = it }, placeholder = { Text("Nama") }, 
+                            modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp), singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                        )
+                        OutlinedTextField(
+                            value = freshMemberPhone, onValueChange = { freshMemberPhone = it }, placeholder = { Text("WA") }, 
+                            modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp), singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+                        )
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = { contactPickerLauncher.launch(null) }, colors = ButtonDefaults.buttonColors(containerColor = RoseContainer, contentColor = RoseRed), modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
+                            Icon(Icons.Default.Contacts, null, modifier = Modifier.size(16.dp)); Text("Kontak", fontSize = 11.sp)
+                        }
+                        Button(onClick = { if (freshMemberName.isNotBlank()) { membersList.add(freshMemberName to freshMemberPhone.takeIf { it.isNotBlank() }); freshMemberName = ""; freshMemberPhone = "" } }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
+                            Text("Tambah +", fontSize = 11.sp)
+                        }
+                    }
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        membersList.forEachIndexed { i, p ->
+                            InputChip(selected = true, onClick = { membersList.removeAt(i) }, label = { Text(p.first) }, trailingIcon = { Icon(Icons.Default.Delete, null, modifier = Modifier.size(12.dp)) })
+                        }
+                    }
+                }
+            }
+
+            AnimatedVisibility(visible = isStepThreeDone && membersList.isNotEmpty()) {
+                Button(
+                    onClick = { onCreate(name, selectedFreq!!, baseDueStr.toDouble(), membersList.toList()) },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = RoseRed)
+                ) {
+                    Icon(Icons.Default.Save, null); Spacer(Modifier.width(8.dp)); Text("Simpan", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QuickLogPaymentDialog(
+    groups: List<GroupUiState>,
+    onDismiss: () -> Unit,
+    onLog: (Long, Long, Double, Boolean) -> Unit
+) {
+    var stepOneGroupId by remember { mutableStateOf<Long?>(null) }
+    var stepTwoMemberId by remember { mutableStateOf<Long?>(null) }
+    var stepThreeAmountStr by remember { mutableStateOf("") }
+    var stepFourIsDitalangi by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        containerColor = WarmBackground
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(text = "Catat Pembayaran Iuran", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = OnRoseContainer)
+
+            Text("Langkah 1: Pilih Kelompok", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+            var stepOneExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(expanded = stepOneExpanded, onExpandedChange = { stepOneExpanded = it }) {
+                OutlinedTextField(
+                    value = groups.find { it.group.id == stepOneGroupId }?.group?.name ?: "Pilih Kelompok...",
+                    onValueChange = {}, readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = stepOneExpanded) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(), shape = RoundedCornerShape(16.dp)
+                )
+                ExposedDropdownMenu(expanded = stepOneExpanded, onDismissRequest = { stepOneExpanded = false }) {
+                    groups.forEach { g -> DropdownMenuItem(text = { Text(g.group.name) }, onClick = { stepOneGroupId = g.group.id; stepTwoMemberId = null; stepOneExpanded = false }) }
+                }
+            }
+
+            AnimatedVisibility(visible = stepOneGroupId != null) {
+                val members = groups.find { it.group.id == stepOneGroupId }?.members?.filter { it.state != PaymentState.PAID && it.state != PaymentState.DITALANGI } ?: emptyList()
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    Text("Langkah 2: Pilih Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    var stepTwoExpanded by remember { mutableStateOf(false) }
+                    ExposedDropdownMenuBox(expanded = stepTwoExpanded, onExpandedChange = { stepTwoExpanded = it }) {
+                        val selM = members.find { it.member.id == stepTwoMemberId }
+                        OutlinedTextField(
+                            value = selM?.let { "${it.member.displayName} (Sisa: ${it.sisa})" } ?: "Pilih Anggota...",
+                            onValueChange = {}, readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = stepTwoExpanded) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(), shape = RoundedCornerShape(16.dp)
+                        )
+                        ExposedDropdownMenu(expanded = stepTwoExpanded, onDismissRequest = { stepTwoExpanded = false }) {
+                            members.forEach { m -> DropdownMenuItem(text = { Text("${m.member.displayName} (Sisa: ${m.sisa})") }, onClick = { stepTwoMemberId = m.member.id; stepThreeAmountStr = m.sisa.toString(); stepTwoExpanded = false }) }
+                        }
+                    }
+                }
+            }
+
+            AnimatedVisibility(visible = stepTwoMemberId != null) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    Text("Langkah 3: Jumlah Pembayaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    OutlinedTextField(
+                        value = stepThreeAmountStr, onValueChange = { stepThreeAmountStr = it }, prefix = { Text("Rp ") }, 
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done), 
+                        keyboardActions = KeyboardActions(onDone = { 
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                        }),
+                        modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), singleLine = true
+                    )
+                }
+            }
+
+            val amountValid = stepThreeAmountStr.toDoubleOrNull() != null
+            AnimatedVisibility(visible = stepTwoMemberId != null && amountValid) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column { Text("Talangi Iuran", fontWeight = FontWeight.Bold); Text("Gunakan saldo kas admin", fontSize = 11.sp, color = BalanceSec) }
+                        Switch(checked = stepFourIsDitalangi, onCheckedChange = { stepFourIsDitalangi = it }, colors = SwitchDefaults.colors(checkedTrackColor = RoseRed))
+                    }
+                    Button(onClick = { onLog(stepOneGroupId!!, stepTwoMemberId!!, stepThreeAmountStr.toDouble(), stepFourIsDitalangi) }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = RoseRed)) {
+                        Icon(Icons.Default.CheckCircle, null); Spacer(Modifier.width(8.dp)); Text("Simpan Pembayaran", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MemberActionDialog(
+    item: MemberPaymentState,
+    onDismiss: () -> Unit,
+    onFullPay: () -> Unit,
+    onInstallment: (Double) -> Unit,
+    onTalangi: () -> Unit,
+    onPrune: () -> Unit
+) {
+    var customAmt by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        containerColor = WarmBackground
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(text = "Catat Transaksi: ${item.member.displayName}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = OnRoseContainer)
+            
+            Button(onClick = { onFullPay(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))) {
+                Icon(Icons.Default.Check, null); Spacer(Modifier.width(8.dp)); Text("Lunas Instan (Rp ${item.sisa})")
+            }
+
+            HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+            OutlinedTextField(
+                value = customAmt, onValueChange = { customAmt = it }, label = { Text("Jumlah Angsuran (Rp)") }, 
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done), 
+                keyboardActions = KeyboardActions(onDone = { 
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                }),
+                singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+            Button(onClick = { customAmt.toDoubleOrNull()?.let { onInstallment(it); onDismiss() } }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = RoseRed)) {
+                Text("Simpan Angsuran")
+            }
+
+            HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+            Button(onClick = { onTalangi(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = RoseContainer, contentColor = RoseRed)) {
+                Icon(Icons.Default.Paid, null); Spacer(Modifier.width(8.dp)); Text("Talangi (Bail out)")
+            }
+
+            TextButton(onClick = { onPrune(); onDismiss() }, modifier = Modifier.align(Alignment.CenterHorizontally), colors = ButtonDefaults.textButtonColors(contentColor = AlertError)) {
+                Icon(Icons.Default.PersonRemove, null); Spacer(Modifier.width(8.dp)); Text("Keluarkan dari Roster")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddMemberMidCycleDialog(
+    onDismiss: () -> Unit,
+    onAdd: (String, String?, Boolean) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var isCatchUp by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        containerColor = WarmBackground
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(text = "Tambah Roster Baru Mid-Cycle", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = RoseRed)
+            
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = "Langkah 1: Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                OutlinedTextField(
+                    value = name, onValueChange = { name = it }, placeholder = { Text("Nama") }, singleLine = true, 
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+            }
+
+            AnimatedVisibility(visible = name.trim().length >= 2) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    Text(text = "Langkah 2: WhatsApp (Opsional)", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    OutlinedTextField(
+                        value = phone, onValueChange = { phone = it }, placeholder = { Text("08...") }, singleLine = true, 
+                        modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { 
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                        })
+                    )
+                }
+            }
+
+            AnimatedVisibility(visible = name.trim().length >= 2) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    Text(text = "Langkah 3: Jenis Masuk Mid-Cycle", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).border(1.dp, if (!isCatchUp) RoseRed else DividerVariant, RoundedCornerShape(12.dp)).clickable { isCatchUp = false }.padding(12.dp)) {
+                            Column { Text("Fresh", fontWeight = FontWeight.Bold, color = if (!isCatchUp) RoseRed else OnRoseContainer); Text("Mulai sekarang", fontSize = 10.sp) }
+                        }
+                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).border(1.dp, if (isCatchUp) RoseRed else DividerVariant, RoundedCornerShape(12.dp)).clickable { isCatchUp = true }.padding(12.dp)) {
+                            Column { Text("Catch Up", fontWeight = FontWeight.Bold, color = if (isCatchUp) RoseRed else OnRoseContainer); Text("Bayar mundur", fontSize = 10.sp) }
+                        }
+                    }
+                }
+            }
+
+            AnimatedVisibility(visible = name.trim().length >= 2) {
+                Button(
+                    onClick = { if (name.isNotBlank()) { onAdd(name, phone.takeIf { it.isNotBlank() }, isCatchUp); onDismiss() } },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = RoseRed),
+                    shape = CircleShape
+                ) { Text("Simpan", fontWeight = FontWeight.Bold) }
+            }
+        }
+    }
+}
+
+@Composable
+fun PiutangRepaymentDialog(
+    memberName: String,
+    maxRepay: Double,
+    onDismiss: () -> Unit,
+    onConfirm: (Double) -> Unit
+) {
+    var amount by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = WarmBackground)) {
+            Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(text = "Bayar Hutang: $memberName", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(text = "Sisa Hutang Maksimal: Rp $maxRepay", color = BalanceSec)
+                OutlinedTextField(
+                    value = amount, onValueChange = { amount = it }, label = { Text("Jumlah Pengembalian (Rp)") }, singleLine = true,
+                    modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+                )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("Batal") }
+                    Button(onClick = { onConfirm(amount.toDoubleOrNull() ?: 0.0) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = RoseRed), shape = CircleShape) { Text("Konfirmasi") }
+                }
+            }
+        }
+    }
+}
