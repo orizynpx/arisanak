@@ -92,6 +92,9 @@ interface ArisanDao {
     suspend fun deletePaymentLogsForMemberAndInterval(memberId: Long, intervalId: Long)
 
     // PiutangLog Queries
+    @Query("SELECT * FROM piutang_log ORDER BY timestamp DESC")
+    fun getAllPiutangLogs(): Flow<List<PiutangLogEntity>>
+
     @Query("SELECT * FROM piutang_log WHERE is_settled = 0 ORDER BY timestamp DESC")
     fun getActivePiutangLogs(): Flow<List<PiutangLogEntity>>
 
