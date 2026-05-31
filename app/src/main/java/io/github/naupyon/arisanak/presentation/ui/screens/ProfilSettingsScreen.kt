@@ -44,7 +44,7 @@ fun ProfilSettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            ProfileHeader(settings?.userName ?: "Ibu Nurul") { viewModel.updateUserName(it) }
+            ProfileHeader(settings?.userName ?: "Ibu Siti") { viewModel.updateUserName(it) }
 
 //            SettingsSection("Tampilan") {
 //                ToggleSetting("Mode Gelap", settings?.isDarkMode ?: false) { viewModel.updateDarkMode(it) }
@@ -68,17 +68,17 @@ fun ProfilSettingsScreen(
 //                }
 //            }
 
-            SettingsSection("Keamanan") {
-                ToggleSetting("Aktifkan PIN", settings?.isPinEnabled ?: false) { viewModel.updatePinEnabled(it) }
-                if (settings?.isPinEnabled == true) {
-                    OutlinedTextField(
-                        value = settings?.pinCode ?: "",
-                        onValueChange = { if (it.length <= 4) viewModel.updatePinCode(it) },
-                        label = { Text("PIN 4-Digit") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
+//            SettingsSection("Keamanan") {
+//                ToggleSetting("Aktifkan PIN", settings?.isPinEnabled ?: false) { viewModel.updatePinEnabled(it) }
+//                if (settings?.isPinEnabled == true) {
+//                    OutlinedTextField(
+//                        value = settings?.pinCode ?: "",
+//                        onValueChange = { if (it.length <= 4) viewModel.updatePinCode(it) },
+//                        label = { Text("PIN 4-Digit") },
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                }
+//            }
 
             SettingsSection("Template Pesan") {
                 OutlinedTextField(
@@ -102,7 +102,16 @@ fun ProfilSettingsScreen(
 
 @Composable
 fun ProfileHeader(name: String, onNameChange: (String) -> Unit) {
-    Card(shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            disabledContainerColor = Color.LightGray,
+            disabledContentColor = Color.DarkGray
+        )
+    ) {
         Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Box(modifier = Modifier.size(64.dp).background(MaterialTheme.colorScheme.primary, CircleShape), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.Person, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(36.dp))
@@ -133,7 +142,16 @@ fun ProfileHeader(name: String, onNameChange: (String) -> Unit) {
 fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Card(shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                disabledContainerColor = Color.LightGray,
+                disabledContentColor = Color.DarkGray
+            )
+        ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 content()
             }

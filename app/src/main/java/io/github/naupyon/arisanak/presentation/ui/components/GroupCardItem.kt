@@ -7,18 +7,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
-import io.github.naupyon.arisanak.presentation.ui.theme.*
 
 @Composable
 fun GroupCardItem(
@@ -27,11 +26,17 @@ fun GroupCardItem(
 ) {
     Card(
         shape = RoundedCornerShape(28.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCardClick() }
-            .testTag("group_card_${groupState.group.id}")
+            .testTag("group_card_${groupState.group.id}"),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            disabledContainerColor = Color.LightGray,
+            disabledContentColor = Color.DarkGray
+        )
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -54,7 +59,7 @@ fun GroupCardItem(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Putaran #${groupState.group.currentIntervalSequence} • Frk: ${groupState.group.frequency}",
+                        text = "Putaran #${groupState.group.currentIntervalSequence} • Frekuensi: ${groupState.group.frequency}",
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -64,12 +69,13 @@ fun GroupCardItem(
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer)
+                        .background(if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = if (groupState.isReadyToKocok) "Siap Kocok" else "Kas Belum Siap",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = if (groupState.isReadyToKocok) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
                     )
                 }
             }
@@ -81,11 +87,11 @@ fun GroupCardItem(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Terkumpul: Rp ${String.format("%,.0f", groupState.collectedAmount)}",
+                        text = "Terkumpul: Rp${String.format("%,.0f", groupState.collectedAmount)}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = "Target: Rp ${String.format("%,.0f", groupState.targetPot)}",
+                        text = "Target: Rp${String.format("%,.0f", groupState.targetPot)}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -95,7 +101,8 @@ fun GroupCardItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
-                        .clip(CircleShape)
+                        .clip(CircleShape),
+//                    color = ProgressIndicatorDefaults.linearColor
                 )
             }
 
@@ -109,12 +116,13 @@ fun GroupCardItem(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .background(MaterialTheme.colorScheme.primary)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Casino,
                         contentDescription = "Kocok Botol",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }

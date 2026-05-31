@@ -48,7 +48,8 @@ fun GroupsListScreen(
                 modifier = Modifier
                     .padding(bottom = 0.dp, end = 16.dp)
                     .size(64.dp)
-                    .testTag("add_group_fab")
+                    .testTag("add_group_fab"),
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Kelompok", modifier = Modifier.size(28.dp))
             }

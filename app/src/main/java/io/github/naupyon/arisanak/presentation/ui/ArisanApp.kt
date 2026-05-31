@@ -27,9 +27,9 @@ fun ArisanApp() {
         darkTheme = /*settings?.isDarkMode ?:*/ false,
         dynamicColor = /*settings?.colorMode == "Material You"*/ false
     ) {
-        SecurityLockScreen(viewModel = viewModel) {
+//        SecurityLockScreen(viewModel = viewModel) {
             MainNavigationShell(viewModel = viewModel)
-        }
+//        }
     }
 }
 
@@ -64,7 +64,7 @@ fun MainNavigationShell(viewModel: ArisanViewModel) {
                                 modifier = Modifier.size(24.dp)
                             )
                         },
-                        label = { Text("Home") }
+                        label = { Text("Beranda") }
                     )
 
                     NavigationBarItem(
@@ -85,7 +85,7 @@ fun MainNavigationShell(viewModel: ArisanViewModel) {
                                 modifier = Modifier.size(24.dp)
                             )
                         },
-                        label = { Text("Groups") }
+                        label = { Text("Grup") }
                     )
 
                     NavigationBarItem(

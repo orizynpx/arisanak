@@ -46,6 +46,7 @@ fun HomeScreen(
     var showQuickLogSheet by remember { mutableStateOf(false) }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
@@ -63,7 +64,8 @@ fun HomeScreen(
                 modifier = Modifier
                     .padding(bottom = 0.dp, end = 16.dp)
                     .size(64.dp)
-                    .testTag("quick_log_fab")
+                    .testTag("quick_log_fab"),
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Pembayaran", modifier = Modifier.size(28.dp))
             }
@@ -73,7 +75,8 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(vertical = 0.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
@@ -82,7 +85,13 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onNavigateToPiutang() }
-                        .testTag("balance_summary_card")
+                        .testTag("balance_summary_card"),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        disabledContainerColor = Color.LightGray,
+                        disabledContentColor = Color.DarkGray
+                    )
                 ) {
                     Box(
                         modifier = Modifier
@@ -106,7 +115,7 @@ fun HomeScreen(
                                 )
                             }
                             Text(
-                                  text = String.format(locale, "Rp %,.0f", totalPiutang),
+                                  text = String.format(locale, "Rp%,.0f", totalPiutang),
                                   style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold)
                             )
                             Text(
@@ -128,7 +137,13 @@ fun HomeScreen(
                     if (groups.isEmpty()) {
                         Card(
                             shape = RoundedCornerShape(24.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                disabledContainerColor = Color.LightGray,
+                                disabledContentColor = Color.DarkGray
+                            )
                         ) {
                             Box(
                                 modifier = Modifier
@@ -152,7 +167,13 @@ fun HomeScreen(
                                     shape = RoundedCornerShape(28.dp),
                                     modifier = Modifier
                                         .width(300.dp)
-                                        .clickable { onNavigateToGroup(groupState.group.id) }
+                                        .clickable { onNavigateToGroup(groupState.group.id) },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        disabledContainerColor = Color.LightGray,
+                                        disabledContentColor = Color.DarkGray
+                                    )
                                 ) {
                                     Column(
                                         modifier = Modifier.padding(20.dp),
@@ -179,13 +200,14 @@ fun HomeScreen(
                                                 modifier = Modifier
                                                     .padding(start = 8.dp)
                                                     .clip(CircleShape)
-                                                    .background(if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer)
+                                                    .background(/*if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primary else */MaterialTheme.colorScheme.secondary)
                                                     .padding(horizontal = 10.dp, vertical = 4.dp)
                                             ) {
                                                 Text(
                                                     text = if (groupState.isReadyToKocok) "Siap Kocok" else "Berjalan",
                                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                                    maxLines = 1
+                                                    maxLines = 1,
+                                                    color = /*if (groupState.isReadyToKocok) MaterialTheme.colorScheme.onPrimary else */MaterialTheme.colorScheme.onSecondary
                                                 )
                                             }
                                         }
@@ -198,9 +220,9 @@ fun HomeScreen(
                                         ) {
                                             IconButton(
                                                 onClick = { onNavigateToGroup(groupState.group.id) },
-                                                modifier = Modifier.size(44.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.primaryContainer)
+                                                modifier = Modifier.size(44.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.primary)
                                             ) {
-                                                Icon(imageVector = Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(24.dp))
+                                                Icon(imageVector = Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onPrimary)
                                             }
                                         }
                                     }
@@ -241,7 +263,13 @@ fun HomeScreen(
                 items(transactionHistory) { item ->
                     Card(
                         shape = RoundedCornerShape(24.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = Color.LightGray,
+                            disabledContentColor = Color.DarkGray
+                        )
                     ) {
                         Row(
                             modifier = Modifier
