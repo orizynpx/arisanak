@@ -36,6 +36,7 @@ interface ArisanRepository {
     suspend fun deletePaymentLogsForMemberAndInterval(memberId: Long, intervalId: Long)
 
     fun getActivePiutangLogs(): Flow<List<PiutangLog>>
+    fun getAllPiutangLogs(): Flow<List<PiutangLog>>
     suspend fun getActivePiutangLogsForMember(memberId: Long): List<PiutangLog>
     fun getPiutangLogsForMember(memberId: Long): Flow<List<PiutangLog>>
     suspend fun insertPiutangLog(piutangLog: PiutangLog): Long
