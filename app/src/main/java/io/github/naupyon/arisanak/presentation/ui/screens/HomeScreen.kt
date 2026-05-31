@@ -47,7 +47,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            LargeTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = "Arisanak",
