@@ -1,5 +1,4 @@
 package io.github.naupyon.arisanak.presentation.ui.theme
-
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF904A4B)
@@ -218,16 +217,9 @@ val surfaceContainerDarkHighContrast = Color(0xFF382E2E)
 val surfaceContainerHighDarkHighContrast = Color(0xFF443938)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF504444)
 
-// Legacy color aliases to maintain backward compatibility with existing screens and components
-val RoseRed = primaryLight
-val OnRoseRed = onPrimaryLight
-val RoseContainer = primaryContainerLight
-val OnRoseContainer = onPrimaryContainerLight
-val BalanceSec = secondaryLight
-val StatusSecContainer = secondaryContainerLight
-val GoldTertiary = tertiaryLight
-val CicilanTertiaryContainer = tertiaryContainerLight
-val WarmBackground = backgroundLight
-val WarmSurface = surfaceLight
-val DividerVariant = outlineVariantLight
-val AlertError = errorLight
+
+
+
+
+
+

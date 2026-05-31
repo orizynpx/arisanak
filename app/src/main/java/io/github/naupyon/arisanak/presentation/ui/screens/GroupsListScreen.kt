@@ -38,15 +38,12 @@ fun GroupsListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Kelompok Arisan", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = WarmBackground)
+                title = { Text("Kelompok Arisan", fontWeight = FontWeight.Bold) }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCreateDialog = true },
-                containerColor = RoseRed,
-                contentColor = Color.White,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .padding(bottom = 0.dp, end = 16.dp)
@@ -55,8 +52,7 @@ fun GroupsListScreen(
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Kelompok", modifier = Modifier.size(28.dp))
             }
-        },
-        containerColor = WarmBackground
+        }
     ) { innerPadding ->
         if (groups.isEmpty()) {
             Box(
@@ -69,8 +65,8 @@ fun GroupsListScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(imageVector = Icons.Outlined.People, contentDescription = null, modifier = Modifier.size(64.dp), tint = BalanceSec)
-                    Text("Belum ada kelompok arisan.", color = BalanceSec, style = MaterialTheme.typography.bodyLarge)
+                    Icon(imageVector = Icons.Outlined.People, contentDescription = null, modifier = Modifier.size(64.dp))
+                    Text("Belum ada kelompok arisan.", style = MaterialTheme.typography.bodyLarge)
                 }
             }
         } else {

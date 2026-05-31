@@ -32,7 +32,7 @@ fun SecurityLockScreen(
     var hasInitialized by remember { mutableStateOf(false) }
 
     if (settings == null) {
-        Box(modifier = Modifier.fillMaxSize().background(WarmBackground))
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
         return
     }
 
@@ -49,7 +49,6 @@ fun SecurityLockScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(WarmBackground)
                 .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -60,20 +59,18 @@ fun SecurityLockScreen(
                 Icon(
                     imageVector = Icons.Filled.Lock,
                     contentDescription = "Aplikasi Terkunci",
-                    tint = RoseRed,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(64.dp)
                 )
 
                 Text(
                     text = "Arisanak Terkunci",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                    color = OnRoseContainer
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
                 )
 
                 Text(
                     text = "Masukkan PIN 4-Digit",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = BalanceSec
+                    style = MaterialTheme.typography.bodyLarge
                 )
 
                 Row(
@@ -85,7 +82,7 @@ fun SecurityLockScreen(
                             modifier = Modifier
                                 .size(20.dp)
                                 .clip(CircleShape)
-                                .background(if (pinState.length > i) RoseRed else DividerVariant.copy(alpha = 0.5f))
+                                .background(if (pinState.length > i) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                         )
                     }
                 }
@@ -127,10 +124,6 @@ fun SecurityLockScreen(
                                             }
                                         }
                                     },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (key == "OK") RoseRed else RoseContainer,
-                                        contentColor = if (key == "OK") OnRoseRed else OnRoseContainer
-                                    ),
                                     modifier = Modifier.size(72.dp),
                                     shape = CircleShape,
                                     contentPadding = PaddingValues(0.dp)

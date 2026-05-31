@@ -24,8 +24,8 @@ fun ArisanApp() {
     val settings by viewModel.settings.collectAsState()
 
     MyApplicationTheme(
-        darkTheme = settings?.isDarkMode ?: false,
-        dynamicColor = settings?.colorMode == "Material You"
+        darkTheme = /*settings?.isDarkMode ?:*/ false,
+        dynamicColor = /*settings?.colorMode == "Material You"*/ false
     ) {
         SecurityLockScreen(viewModel = viewModel) {
             MainNavigationShell(viewModel = viewModel)
@@ -45,105 +45,72 @@ fun MainNavigationShell(viewModel: ArisanViewModel) {
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             if (showBottomBar) {
-                Surface(
-                    color = WarmSurface,
-                    tonalElevation = 0.dp
-                ) {
-                    NavigationBar(
-                        containerColor = Color.Transparent,
-                        contentColor = RoseRed,
-                        tonalElevation = 0.dp,
-                        windowInsets = WindowInsets.navigationBars,
-                        modifier = Modifier.height(100.dp)
-                    ) {
-                        NavigationBarItem(
-                            selected = currentRoute == "home",
-                            onClick = {
-                                navController.navigate("home") {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = currentRoute == "home",
+                        onClick = {
+                            navController.navigate("home") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
                                 }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = if (currentRoute == "home") Icons.Default.Home else Icons.Outlined.Home,
-                                    contentDescription = "Home",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            },
-                            label = { Text("Home", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = RoseRed,
-                                unselectedIconColor = BalanceSec,
-                                selectedTextColor = RoseRed,
-                                unselectedTextColor = BalanceSec,
-                                indicatorColor = RoseContainer
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (currentRoute == "home") Icons.Default.Home else Icons.Outlined.Home,
+                                contentDescription = "Home",
+                                modifier = Modifier.size(24.dp)
                             )
-                        )
+                        },
+                        label = { Text("Home") }
+                    )
 
-                        NavigationBarItem(
-                            selected = currentRoute == "groups",
-                            onClick = {
-                                navController.navigate("groups") {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
+                    NavigationBarItem(
+                        selected = currentRoute == "groups",
+                        onClick = {
+                            navController.navigate("groups") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
                                 }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = if (currentRoute == "groups") Icons.Default.Groups else Icons.Outlined.Groups,
-                                    contentDescription = "Groups",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            },
-                            label = { Text("Groups", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = RoseRed,
-                                unselectedIconColor = BalanceSec,
-                                selectedTextColor = RoseRed,
-                                unselectedTextColor = BalanceSec,
-                                indicatorColor = RoseContainer
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (currentRoute == "groups") Icons.Default.Groups else Icons.Outlined.Groups,
+                                contentDescription = "Groups",
+                                modifier = Modifier.size(24.dp)
                             )
-                        )
+                        },
+                        label = { Text("Groups") }
+                    )
 
-                        NavigationBarItem(
-                            selected = currentRoute == "profil",
-                            onClick = {
-                                navController.navigate("profil") {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
+                    NavigationBarItem(
+                        selected = currentRoute == "profil",
+                        onClick = {
+                            navController.navigate("profil") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
                                 }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = if (currentRoute == "profil") Icons.Default.Person else Icons.Outlined.Person,
-                                    contentDescription = "Profil",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            },
-                            label = { Text("Profil", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = RoseRed,
-                                unselectedIconColor = BalanceSec,
-                                selectedTextColor = RoseRed,
-                                unselectedTextColor = BalanceSec,
-                                indicatorColor = RoseContainer
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (currentRoute == "profil") Icons.Default.Person else Icons.Outlined.Person,
+                                contentDescription = "Profil",
+                                modifier = Modifier.size(24.dp)
                             )
-                        )
-                    }
+                        },
+                        label = { Text("Profil") }
+                    )
                 }
             }
-        },
-        containerColor = WarmBackground
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,

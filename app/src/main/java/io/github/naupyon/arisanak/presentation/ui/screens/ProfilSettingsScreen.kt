@@ -32,11 +32,9 @@ fun ProfilSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Profil & Pengaturan", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = WarmBackground)
+                title = { Text(text = "Profil & Pengaturan", fontWeight = FontWeight.Bold) }
             )
-        },
-        containerColor = WarmBackground
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -48,27 +46,27 @@ fun ProfilSettingsScreen(
         ) {
             ProfileHeader(settings?.userName ?: "Ibu Nurul") { viewModel.updateUserName(it) }
 
-            SettingsSection("Tampilan") {
-                ToggleSetting("Mode Gelap", settings?.isDarkMode ?: false) { viewModel.updateDarkMode(it) }
-                
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Warna Tema")
-                    TextButton(onClick = { viewModel.updateColorMode(if (settings?.colorMode == "Default") "Material You" else "Default") }) {
-                        Text(settings?.colorMode ?: "Default")
-                    }
-                }
-            }
-
-            SettingsSection("Bahasa") {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Bahasa Aplikasi")
-                    Row {
-                        FilterChip(selected = settings?.language == "ID", onClick = { viewModel.updateLanguage("ID") }, label = { Text("ID") })
-                        Spacer(Modifier.width(8.dp))
-                        FilterChip(selected = settings?.language == "EN", onClick = { viewModel.updateLanguage("EN") }, label = { Text("EN") })
-                    }
-                }
-            }
+//            SettingsSection("Tampilan") {
+//                ToggleSetting("Mode Gelap", settings?.isDarkMode ?: false) { viewModel.updateDarkMode(it) }
+//
+//                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+//                    Text("Warna Tema")
+//                    TextButton(onClick = { viewModel.updateColorMode(if (settings?.colorMode == "Default") "Material You" else "Default") }) {
+//                        Text(settings?.colorMode ?: "Default")
+//                    }
+//                }
+//            }
+//
+//            SettingsSection("Bahasa") {
+//                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+//                    Text("Bahasa Aplikasi")
+//                    Row {
+//                        FilterChip(selected = settings?.language == "ID", onClick = { viewModel.updateLanguage("ID") }, label = { Text("ID") })
+//                        Spacer(Modifier.width(8.dp))
+//                        FilterChip(selected = settings?.language == "EN", onClick = { viewModel.updateLanguage("EN") }, label = { Text("EN") })
+//                    }
+//                }
+//            }
 
             SettingsSection("Keamanan") {
                 ToggleSetting("Aktifkan PIN", settings?.isPinEnabled ?: false) { viewModel.updatePinEnabled(it) }
@@ -104,10 +102,10 @@ fun ProfilSettingsScreen(
 
 @Composable
 fun ProfileHeader(name: String, onNameChange: (String) -> Unit) {
-    Card(shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = RoseContainer), modifier = Modifier.fillMaxWidth()) {
+    Card(shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(modifier = Modifier.size(64.dp).background(RoseRed, CircleShape), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Person, null, tint = Color.White, modifier = Modifier.size(36.dp))
+            Box(modifier = Modifier.size(64.dp).background(MaterialTheme.colorScheme.primary, CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.Person, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(36.dp))
             }
             Column(modifier = Modifier.weight(1f)) {
                 var isEditing by remember { mutableStateOf(false) }
@@ -121,11 +119,11 @@ fun ProfileHeader(name: String, onNameChange: (String) -> Unit) {
                     )
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = OnRoseContainer)
+                        Text(text = name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         IconButton(onClick = { isEditing = true }) { Icon(Icons.Default.Edit, null, modifier = Modifier.size(16.dp)) }
                     }
                 }
-                Text(text = "PRO MEMBER", style = MaterialTheme.typography.labelSmall, color = GoldTertiary)
+                Text(text = "Bandar Arisan", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
             }
         }
     }
@@ -134,8 +132,8 @@ fun ProfileHeader(name: String, onNameChange: (String) -> Unit) {
 @Composable
 fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = OnRoseContainer)
-        Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = WarmSurface), modifier = Modifier.fillMaxWidth()) {
+        Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Card(shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 content()
             }
@@ -147,6 +145,6 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
 fun ToggleSetting(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Text(label)
-        Switch(checked = checked, onCheckedChange = onCheckedChange, colors = SwitchDefaults.colors(checkedTrackColor = RoseRed))
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }

@@ -62,17 +62,16 @@ fun CreateGroupDialog(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        containerColor = WarmBackground
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Buat Kelompok Baru", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = RoseRed)
+            Text(text = "Buat Kelompok Baru", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = "Langkah 1: Nama Kelompok Arisan", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                Text(text = "Langkah 1: Nama Kelompok Arisan", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                 OutlinedTextField(
                     value = name, onValueChange = { name = it }, placeholder = { Text("cth: Arisan Keluarga") }, singleLine = true, 
                     modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
@@ -83,16 +82,16 @@ fun CreateGroupDialog(
             val isStepOneDone = name.trim().length >= 3
             AnimatedVisibility(visible = isStepOneDone) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
-                    Text(text = "Langkah 2: Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    HorizontalDivider()
+                    Text(text = "Langkah 2: Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         ArisanFrequency.entries.forEach { freq ->
                             val isSel = freq == selectedFreq
                             Box(
-                                modifier = Modifier.weight(1f).clip(CircleShape).background(if (isSel) RoseRed else DividerVariant.copy(alpha = 0.2f)).clickable { selectedFreq = freq }.padding(vertical = 10.dp),
+                                modifier = Modifier.weight(1f).clip(CircleShape).background(if (isSel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant).clickable { selectedFreq = freq }.padding(vertical = 10.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = freq.name, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (isSel) Color.White else OnRoseContainer)
+                                Text(text = freq.name, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -102,8 +101,8 @@ fun CreateGroupDialog(
             val isStepTwoDone = isStepOneDone && selectedFreq != null
             AnimatedVisibility(visible = isStepTwoDone) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
-                    Text(text = "Langkah 3: Jumlah Iuran Dasar", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    HorizontalDivider()
+                    Text(text = "Langkah 3: Jumlah Iuran Dasar", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     OutlinedTextField(
                         value = baseDueStr, onValueChange = { baseDueStr = it }, prefix = { Text("Rp ") }, 
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next), 
@@ -115,8 +114,8 @@ fun CreateGroupDialog(
             val isStepThreeDone = isStepTwoDone && baseDueStr.toDoubleOrNull() != null
             AnimatedVisibility(visible = isStepThreeDone) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
-                    Text(text = "Langkah 4: Tambahkan Anggota (${membersList.size})", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    HorizontalDivider()
+                    Text(text = "Langkah 4: Tambahkan Anggota (${membersList.size})", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = freshMemberName, onValueChange = { freshMemberName = it }, placeholder = { Text("Nama") }, 
@@ -131,7 +130,7 @@ fun CreateGroupDialog(
                         )
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { contactPickerLauncher.launch(null) }, colors = ButtonDefaults.buttonColors(containerColor = RoseContainer, contentColor = RoseRed), modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
+                        Button(onClick = { contactPickerLauncher.launch(null) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
                             Icon(Icons.Default.Contacts, null, modifier = Modifier.size(16.dp)); Text("Kontak", fontSize = 11.sp)
                         }
                         Button(onClick = { if (freshMemberName.isNotBlank()) { membersList.add(freshMemberName to freshMemberPhone.takeIf { it.isNotBlank() }); freshMemberName = ""; freshMemberPhone = "" } }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
@@ -150,8 +149,7 @@ fun CreateGroupDialog(
                 Button(
                     onClick = { onCreate(name, selectedFreq!!, baseDueStr.toDouble(), membersList.toList()) },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = RoseRed)
+                    shape = CircleShape
                 ) {
                     Icon(Icons.Default.Save, null); Spacer(Modifier.width(8.dp)); Text("Simpan", fontWeight = FontWeight.Bold)
                 }
@@ -177,13 +175,12 @@ fun QuickLogPaymentDialog(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        containerColor = WarmBackground
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(text = "Catat Pembayaran Iuran", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = OnRoseContainer)
+            Text(text = "Catat Pembayaran Iuran", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
 
-            Text("Langkah 1: Pilih Kelompok", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+            Text("Langkah 1: Pilih Kelompok", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
             var stepOneExpanded by remember { mutableStateOf(false) }
             ExposedDropdownMenuBox(expanded = stepOneExpanded, onExpandedChange = { stepOneExpanded = it }) {
                 OutlinedTextField(
@@ -200,8 +197,8 @@ fun QuickLogPaymentDialog(
             AnimatedVisibility(visible = stepOneGroupId != null) {
                 val members = groups.find { it.group.id == stepOneGroupId }?.members?.filter { it.state != PaymentState.PAID && it.state != PaymentState.DITALANGI } ?: emptyList()
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
-                    Text("Langkah 2: Pilih Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    HorizontalDivider()
+                    Text("Langkah 2: Pilih Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     var stepTwoExpanded by remember { mutableStateOf(false) }
                     ExposedDropdownMenuBox(expanded = stepTwoExpanded, onExpandedChange = { stepTwoExpanded = it }) {
                         val selM = members.find { it.member.id == stepTwoMemberId }
@@ -220,8 +217,8 @@ fun QuickLogPaymentDialog(
 
             AnimatedVisibility(visible = stepTwoMemberId != null) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
-                    Text("Langkah 3: Jumlah Pembayaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    HorizontalDivider()
+                    Text("Langkah 3: Jumlah Pembayaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     OutlinedTextField(
                         value = stepThreeAmountStr, onValueChange = { stepThreeAmountStr = it }, prefix = { Text("Rp ") }, 
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done), 
@@ -237,12 +234,12 @@ fun QuickLogPaymentDialog(
             val amountValid = stepThreeAmountStr.toDoubleOrNull() != null
             AnimatedVisibility(visible = stepTwoMemberId != null && amountValid) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+                    HorizontalDivider()
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column { Text("Talangi Iuran", fontWeight = FontWeight.Bold); Text("Gunakan saldo kas admin", fontSize = 11.sp, color = BalanceSec) }
-                        Switch(checked = stepFourIsDitalangi, onCheckedChange = { stepFourIsDitalangi = it }, colors = SwitchDefaults.colors(checkedTrackColor = RoseRed))
+                        Column { Text("Talangi Iuran", fontWeight = FontWeight.Bold); Text("Gunakan saldo kas admin", fontSize = 11.sp) }
+                        Switch(checked = stepFourIsDitalangi, onCheckedChange = { stepFourIsDitalangi = it })
                     }
-                    Button(onClick = { onLog(stepOneGroupId!!, stepTwoMemberId!!, stepThreeAmountStr.toDouble(), stepFourIsDitalangi) }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = RoseRed)) {
+                    Button(onClick = { onLog(stepOneGroupId!!, stepTwoMemberId!!, stepThreeAmountStr.toDouble(), stepFourIsDitalangi) }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape) {
                         Icon(Icons.Default.CheckCircle, null); Spacer(Modifier.width(8.dp)); Text("Simpan Pembayaran", fontWeight = FontWeight.Bold)
                     }
                 }
@@ -268,17 +265,16 @@ fun MemberActionDialog(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        containerColor = WarmBackground
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(text = "Catat Transaksi: ${item.member.displayName}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = OnRoseContainer)
+            Text(text = "Catat Transaksi: ${item.member.displayName}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             
             Button(onClick = { onFullPay(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))) {
                 Icon(Icons.Default.Check, null); Spacer(Modifier.width(8.dp)); Text("Lunas Instan (Rp ${item.sisa})")
             }
 
-            HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
+            HorizontalDivider()
             OutlinedTextField(
                 value = customAmt, onValueChange = { customAmt = it }, label = { Text("Jumlah Angsuran (Rp)") }, 
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done), 
@@ -288,16 +284,16 @@ fun MemberActionDialog(
                 }),
                 singleLine = true, modifier = Modifier.fillMaxWidth()
             )
-            Button(onClick = { customAmt.toDoubleOrNull()?.let { onInstallment(it); onDismiss() } }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = RoseRed)) {
+            Button(onClick = { customAmt.toDoubleOrNull()?.let { onInstallment(it); onDismiss() } }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape) {
                 Text("Simpan Angsuran")
             }
 
-            HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
-            Button(onClick = { onTalangi(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = RoseContainer, contentColor = RoseRed)) {
+            HorizontalDivider()
+            Button(onClick = { onTalangi(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape) {
                 Icon(Icons.Default.Paid, null); Spacer(Modifier.width(8.dp)); Text("Talangi (Bail out)")
             }
 
-            TextButton(onClick = { onPrune(); onDismiss() }, modifier = Modifier.align(Alignment.CenterHorizontally), colors = ButtonDefaults.textButtonColors(contentColor = AlertError)) {
+            TextButton(onClick = { onPrune(); onDismiss() }, modifier = Modifier.align(Alignment.CenterHorizontally), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
                 Icon(Icons.Default.PersonRemove, null); Spacer(Modifier.width(8.dp)); Text("Keluarkan dari Roster")
             }
         }
@@ -319,14 +315,13 @@ fun AddMemberMidCycleDialog(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        containerColor = WarmBackground
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(text = "Tambah Roster Baru Mid-Cycle", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = RoseRed)
+            Text(text = "Tambah Roster Baru Mid-Cycle", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = "Langkah 1: Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                Text(text = "Langkah 1: Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                 OutlinedTextField(
                     value = name, onValueChange = { name = it }, placeholder = { Text("Nama") }, singleLine = true, 
                     modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
@@ -336,8 +331,8 @@ fun AddMemberMidCycleDialog(
 
             AnimatedVisibility(visible = name.trim().length >= 2) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
-                    Text(text = "Langkah 2: WhatsApp (Opsional)", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    HorizontalDivider()
+                    Text(text = "Langkah 2: WhatsApp (Opsional)", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     OutlinedTextField(
                         value = phone, onValueChange = { phone = it }, placeholder = { Text("08...") }, singleLine = true, 
                         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
@@ -352,14 +347,14 @@ fun AddMemberMidCycleDialog(
 
             AnimatedVisibility(visible = name.trim().length >= 2) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HorizontalDivider(color = DividerVariant.copy(alpha = 0.5f))
-                    Text(text = "Langkah 3: Jenis Masuk Mid-Cycle", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = RoseRed)
+                    HorizontalDivider()
+                    Text(text = "Langkah 3: Jenis Masuk Mid-Cycle", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).border(1.dp, if (!isCatchUp) RoseRed else DividerVariant, RoundedCornerShape(12.dp)).clickable { isCatchUp = false }.padding(12.dp)) {
-                            Column { Text("Fresh", fontWeight = FontWeight.Bold, color = if (!isCatchUp) RoseRed else OnRoseContainer); Text("Mulai sekarang", fontSize = 10.sp) }
+                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).border(1.dp, if (!isCatchUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)).clickable { isCatchUp = false }.padding(12.dp)) {
+                            Column { Text("Fresh", fontWeight = FontWeight.Bold, color = if (!isCatchUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface); Text("Mulai sekarang", fontSize = 10.sp) }
                         }
-                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).border(1.dp, if (isCatchUp) RoseRed else DividerVariant, RoundedCornerShape(12.dp)).clickable { isCatchUp = true }.padding(12.dp)) {
-                            Column { Text("Catch Up", fontWeight = FontWeight.Bold, color = if (isCatchUp) RoseRed else OnRoseContainer); Text("Bayar mundur", fontSize = 10.sp) }
+                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).border(1.dp, if (isCatchUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)).clickable { isCatchUp = true }.padding(12.dp)) {
+                            Column { Text("Catch Up", fontWeight = FontWeight.Bold, color = if (isCatchUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface); Text("Bayar mundur", fontSize = 10.sp) }
                         }
                     }
                 }
@@ -369,7 +364,6 @@ fun AddMemberMidCycleDialog(
                 Button(
                     onClick = { if (name.isNotBlank()) { onAdd(name, phone.takeIf { it.isNotBlank() }, isCatchUp); onDismiss() } },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = RoseRed),
                     shape = CircleShape
                 ) { Text("Simpan", fontWeight = FontWeight.Bold) }
             }
@@ -388,10 +382,10 @@ fun PiutangRepaymentDialog(
     val focusManager = LocalFocusManager.current
 
     Dialog(onDismissRequest = onDismiss) {
-        Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = WarmBackground)) {
+        Card(shape = RoundedCornerShape(28.dp)) {
             Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(text = "Bayar Hutang: $memberName", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text(text = "Sisa Hutang Maksimal: Rp $maxRepay", color = BalanceSec)
+                Text(text = "Sisa Hutang Maksimal: Rp $maxRepay")
                 OutlinedTextField(
                     value = amount, onValueChange = { amount = it }, label = { Text("Jumlah Pengembalian (Rp)") }, singleLine = true,
                     modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
@@ -399,7 +393,7 @@ fun PiutangRepaymentDialog(
                 )
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("Batal") }
-                    Button(onClick = { onConfirm(amount.toDoubleOrNull() ?: 0.0) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = RoseRed), shape = CircleShape) { Text("Konfirmasi") }
+                    Button(onClick = { onConfirm(amount.toDoubleOrNull() ?: 0.0) }, modifier = Modifier.weight(1f), shape = CircleShape) { Text("Konfirmasi") }
                 }
             }
         }

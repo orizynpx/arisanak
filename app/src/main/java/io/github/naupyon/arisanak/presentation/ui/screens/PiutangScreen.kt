@@ -40,11 +40,9 @@ fun PiutangScreen(
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = WarmBackground)
+                }
             )
-        },
-        containerColor = WarmBackground
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -55,15 +53,14 @@ fun PiutangScreen(
         ) {
             Card(
                 shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = RoseContainer),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text(text = "Total Piutang Belum Tertagih", color = OnRoseContainer)
+                    Text(text = "Total Piutang Belum Tertagih")
                     Text(
                         text = String.format(LocalLocale.current.platformLocale, "Rp %,.0f", totalPiutang),
                         style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
-                        color = RoseRed
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -71,8 +68,8 @@ fun PiutangScreen(
             if (debtors.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(64.dp), tint = DividerVariant)
-                        Text(text = "Hebat! Tidak ada piutang yang aktif.", color = BalanceSec)
+                        Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(64.dp))
+                        Text(text = "Hebat! Tidak ada piutang yang aktif.")
                     }
                 }
             } else {
@@ -102,7 +99,6 @@ fun PiutangScreen(
 fun PiutangRowItem(debtor: PiutangDebtorState, onPay: () -> Unit) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = WarmSurface),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -111,11 +107,11 @@ fun PiutangRowItem(debtor: PiutangDebtorState, onPay: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = debtor.member.displayName, fontWeight = FontWeight.Bold, color = OnRoseContainer)
-                Text(text = "Asal Kelompok: ${debtor.groupName}", fontSize = 12.sp, color = BalanceSec)
-                Text(text = "Hutang: Rp ${String.format(LocalLocale.current.platformLocale, "%,.0f", debtor.totalDebt - debtor.totalRepaid)}", color = RoseRed)
+                Text(text = debtor.member.displayName, fontWeight = FontWeight.Bold)
+                Text(text = "Asal Kelompok: ${debtor.groupName}", fontSize = 12.sp)
+                Text(text = "Hutang: Rp ${String.format(LocalLocale.current.platformLocale, "%,.0f", debtor.totalDebt - debtor.totalRepaid)}", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
             }
-            Button(onClick = onPay, colors = ButtonDefaults.buttonColors(containerColor = RoseRed), shape = CircleShape) {
+            Button(onClick = onPay, shape = CircleShape) {
                 Text("Bayar")
             }
         }

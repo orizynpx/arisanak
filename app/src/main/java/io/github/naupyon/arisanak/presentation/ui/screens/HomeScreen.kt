@@ -11,7 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.ReceiptLong
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -49,38 +49,16 @@ fun HomeScreen(
         topBar = {
             LargeTopAppBar(
                 title = {
-                    Column {
-                        Text(
-                            text = "Arisanak",
-                            style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
-                            color = RoseRed
-                        )
-                        Text(
-                            text = "Aplikasi Bendahara Arisan",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = BalanceSec
-                        )
-                    }
-                },
-                actions = {
-                    Box(
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .clip(CircleShape)
-                            .background(RoseContainer)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(text = "PRO ADMIN", color = RoseRed, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
-                    }
-                },
-                colors = TopAppBarDefaults.largeTopAppBarColors(containerColor = WarmBackground)
+                    Text(
+                        text = "Arisanak",
+                        style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showQuickLogSheet = true },
-                containerColor = RoseRed,
-                contentColor = Color.White,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .padding(bottom = 0.dp, end = 16.dp)
@@ -89,8 +67,7 @@ fun HomeScreen(
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Pembayaran", modifier = Modifier.size(28.dp))
             }
-        },
-        containerColor = WarmBackground
+        }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -102,7 +79,6 @@ fun HomeScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(28.dp),
-                    colors = CardDefaults.cardColors(containerColor = RoseContainer),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onNavigateToPiutang() }
@@ -111,11 +87,6 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors = listOf(RoseContainer, RoseContainer.copy(alpha = 0.8f))
-                                )
-                            )
                             .padding(24.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -125,26 +96,22 @@ fun HomeScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Total Piutang Anda (Talangan)",
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = OnRoseContainer
+                                    text = "Total yang Anda Talangi",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
                                 )
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = "Detail",
-                                    tint = RoseRed,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
                             Text(
                                   text = String.format(locale, "Rp %,.0f", totalPiutang),
-                                  style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
-                                  color = RoseRed
+                                  style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold)
                             )
                             Text(
                                 text = "Klik untuk mengelola cicilan piutang anggota.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = BalanceSec
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
@@ -155,14 +122,12 @@ fun HomeScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = "Kelompok Arisan Anda",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = OnRoseContainer
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                     
                     if (groups.isEmpty()) {
                         Card(
                             shape = RoundedCornerShape(24.dp),
-                            colors = CardDefaults.cardColors(containerColor = WarmSurface),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Box(
@@ -172,8 +137,8 @@ fun HomeScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Icon(imageVector = Icons.Outlined.Groups, contentDescription = null, modifier = Modifier.size(48.dp), tint = BalanceSec)
-                                    Text("Belum ada kelompok aktif. Tambahkan di tab Groups!", color = BalanceSec, textAlign = TextAlign.Center)
+                                    Icon(imageVector = Icons.Outlined.Groups, contentDescription = null, modifier = Modifier.size(48.dp))
+                                    Text("Belum ada kelompok aktif. Tambahkan di tab Groups!", textAlign = TextAlign.Center)
                                 }
                             }
                         }
@@ -185,7 +150,6 @@ fun HomeScreen(
                             items(groups) { groupState ->
                                 Card(
                                     shape = RoundedCornerShape(28.dp),
-                                    colors = CardDefaults.cardColors(containerColor = WarmSurface),
                                     modifier = Modifier
                                         .width(300.dp)
                                         .clickable { onNavigateToGroup(groupState.group.id) }
@@ -203,33 +167,30 @@ fun HomeScreen(
                                                 Text(
                                                     text = groupState.group.name,
                                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                                    color = OnRoseContainer,
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
                                                 Text(
                                                     text = "Putaran #${groupState.group.currentIntervalSequence}",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = BalanceSec
+                                                    style = MaterialTheme.typography.bodySmall
                                                 )
                                             }
                                             Box(
                                                 modifier = Modifier
                                                     .padding(start = 8.dp)
                                                     .clip(CircleShape)
-                                                    .background(if (groupState.isReadyToKocok) RoseContainer else StatusSecContainer)
+                                                    .background(if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer)
                                                     .padding(horizontal = 10.dp, vertical = 4.dp)
                                             ) {
                                                 Text(
                                                     text = if (groupState.isReadyToKocok) "Siap Kocok" else "Berjalan",
                                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                                    color = if (groupState.isReadyToKocok) RoseRed else BalanceSec,
                                                     maxLines = 1
                                                 )
                                             }
                                         }
                                         val progress = if (groupState.targetPot > 0) (groupState.collectedAmount / groupState.targetPot).toFloat() else 0f
-                                        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape), color = RoseRed, trackColor = DividerVariant)
+                                        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape))
 
                                         Row(
                                             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -237,9 +198,9 @@ fun HomeScreen(
                                         ) {
                                             IconButton(
                                                 onClick = { onNavigateToGroup(groupState.group.id) },
-                                                modifier = Modifier.size(44.dp).clip(RoundedCornerShape(16.dp)).background(RoseContainer)
+                                                modifier = Modifier.size(44.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.primaryContainer)
                                             ) {
-                                                Icon(imageVector = Icons.Default.Casino, contentDescription = null, tint = RoseRed, modifier = Modifier.size(24.dp))
+                                                Icon(imageVector = Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(24.dp))
                                             }
                                         }
                                     }
@@ -253,8 +214,7 @@ fun HomeScreen(
             item {
                 Text(
                     text = "Riwayat Pembayaran Global",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = OnRoseContainer
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
 
@@ -262,7 +222,6 @@ fun HomeScreen(
                 item {
                     Card(
                         shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = WarmSurface),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Box(
@@ -272,8 +231,8 @@ fun HomeScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Icon(imageVector = Icons.Outlined.ReceiptLong, contentDescription = null, modifier = Modifier.size(48.dp), tint = DividerVariant)
-                                Text("Belum ada transaksi pembayaran.", color = BalanceSec, style = MaterialTheme.typography.bodyMedium)
+                                Icon(imageVector = Icons.AutoMirrored.Outlined.ReceiptLong, contentDescription = null, modifier = Modifier.size(48.dp))
+                                Text("Belum ada transaksi pembayaran.", style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }
@@ -282,7 +241,6 @@ fun HomeScreen(
                 items(transactionHistory) { item ->
                     Card(
                         shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = WarmSurface),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -297,20 +255,20 @@ fun HomeScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (item.isDitalangi) AlertError.copy(alpha = 0.1f) else RoseContainer), contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = if (item.isDitalangi) Icons.Default.Warning else Icons.Default.Check, contentDescription = null, tint = if (item.isDitalangi) AlertError else RoseRed, modifier = Modifier.size(20.dp))
+                                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (item.isDitalangi) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
+                                    Icon(imageVector = if (item.isDitalangi) Icons.Default.Warning else Icons.Default.Check, contentDescription = null, modifier = Modifier.size(20.dp))
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = item.memberName, fontWeight = FontWeight.Bold, color = OnRoseContainer, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    Text(text = item.groupName, style = MaterialTheme.typography.bodySmall, color = BalanceSec, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    Text(text = item.formattedDate, style = MaterialTheme.typography.bodySmall, color = BalanceSec.copy(alpha = 0.8f))
+                                    Text(text = item.memberName, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text(text = item.groupName, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text(text = item.formattedDate, style = MaterialTheme.typography.bodySmall)
                                 }
                             }
                             Column(horizontalAlignment = Alignment.End) {
-                                Text(text = String.format(locale, "Rp %,.0f", item.amount), fontWeight = FontWeight.Bold, color = if (item.isDitalangi) AlertError else RoseRed)
+                                Text(text = String.format(locale, "Rp %,.0f", item.amount), fontWeight = FontWeight.Bold, color = if (item.isDitalangi) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
                                 if (item.isDitalangi) {
-                                    Box(modifier = Modifier.clip(CircleShape).background(AlertError.copy(alpha = 0.1f)).padding(horizontal = 6.dp, vertical = 2.dp)) {
-                                        Text("DITALANGI", color = AlertError, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                    Box(modifier = Modifier.clip(CircleShape).background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 6.dp, vertical = 2.dp)) {
+                                        Text("DITALANGI", fontSize = 8.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }

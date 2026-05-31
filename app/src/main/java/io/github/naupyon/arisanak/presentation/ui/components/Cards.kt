@@ -27,7 +27,6 @@ fun GroupCardItem(
 ) {
     Card(
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = WarmSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .fillMaxWidth()
@@ -51,14 +50,12 @@ fun GroupCardItem(
                     Text(
                         text = groupState.group.name,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = OnRoseContainer,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = "Putaran #${groupState.group.currentIntervalSequence} • Frk: ${groupState.group.frequency}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = BalanceSec,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -67,13 +64,12 @@ fun GroupCardItem(
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(if (groupState.isReadyToKocok) RoseContainer else StatusSecContainer)
+                        .background(if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer)
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = if (groupState.isReadyToKocok) "Siap Kocok" else "Kas Belum Siap",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = if (groupState.isReadyToKocok) RoseRed else BalanceSec
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
@@ -86,13 +82,11 @@ fun GroupCardItem(
                 ) {
                     Text(
                         text = "Terkumpul: Rp ${String.format("%,.0f", groupState.collectedAmount)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = OnRoseContainer
+                        style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
                         text = "Target: Rp ${String.format("%,.0f", groupState.targetPot)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = BalanceSec
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
 
@@ -101,9 +95,7 @@ fun GroupCardItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
-                        .clip(CircleShape),
-                    color = RoseRed,
-                    trackColor = DividerVariant
+                        .clip(CircleShape)
                 )
             }
 
@@ -117,12 +109,11 @@ fun GroupCardItem(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(RoseContainer)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Casino,
                         contentDescription = "Kocok Botol",
-                        tint = RoseRed,
                         modifier = Modifier.size(24.dp)
                     )
                 }

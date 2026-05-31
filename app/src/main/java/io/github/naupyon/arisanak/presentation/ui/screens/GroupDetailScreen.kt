@@ -89,11 +89,9 @@ fun GroupDetailScreen(
                             Icon(imageVector = Icons.Default.PersonAdd, contentDescription = "Tambah Anggota")
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = WarmBackground)
+                }
             )
-        },
-        containerColor = WarmBackground
+        }
     ) { innerPadding ->
         if (groupState == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -108,15 +106,7 @@ fun GroupDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 SecondaryTabRow(
-                    selectedTabIndex = activeTabIdx,
-                    containerColor = Color.Transparent,
-                    contentColor = RoseRed,
-                    indicator = {
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(activeTabIdx),
-                            color = RoseRed
-                        )
-                    }
+                    selectedTabIndex = activeTabIdx
                 ) {
                     tabTitles.forEachIndexed { idx, title ->
                         Tab(
@@ -131,7 +121,6 @@ fun GroupDetailScreen(
                     0 -> {
                         Card(
                             shape = RoundedCornerShape(28.dp),
-                            colors = CardDefaults.cardColors(containerColor = RoseContainer),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -140,20 +129,20 @@ fun GroupDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = "Iuran Dasar", style = MaterialTheme.typography.bodySmall, color = OnRoseContainer)
+                                    Text(text = "Iuran Dasar", style = MaterialTheme.typography.bodySmall)
                                     Text(
                                         text = String.format(locale, "Rp %,.0f", groupState.group.baseDueAmount),
                                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                        color = RoseRed
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f)) {
-                                    Text(text = "Total Pot", style = MaterialTheme.typography.bodySmall, color = OnRoseContainer)
+                                    Text(text = "Total Pot", style = MaterialTheme.typography.bodySmall)
                                     Text(
                                         text = String.format(locale, "Rp %,.0f", groupState.targetPot),
                                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                        color = RoseRed
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -167,13 +156,13 @@ fun GroupDetailScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(GoldTertiary.copy(alpha = 0.1f))
+                                    .background(MaterialTheme.colorScheme.tertiaryContainer)
                                     .padding(12.dp)
                             ) {
-                                Icon(imageVector = Icons.Default.Casino, contentDescription = null, tint = GoldTertiary, modifier = Modifier.size(20.dp))
+                                Icon(imageVector = Icons.Default.Casino, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.size(20.dp))
                                 Text(
                                     text = "Pemenang: ${activeWinner.member.displayName}",
-                                    color = OnRoseContainer,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -241,7 +230,6 @@ fun GroupDetailScreen(
                                 val winner = groupState.members.find { it.member.id == interval.winnerMemberId }
                                 Card(
                                     shape = RoundedCornerShape(20.dp),
-                                    colors = CardDefaults.cardColors(containerColor = WarmSurface),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -249,13 +237,16 @@ fun GroupDetailScreen(
                                             Text(text = "Putaran #${interval.sequenceNumber}", fontWeight = FontWeight.Bold)
                                             Text(text = "Pemenang: ${winner?.member?.displayName ?: "Unknown"}")
                                         }
-                                        Text(text = formatEpochToDate(interval.startDate), color = BalanceSec, fontSize = 12.sp)
+                                        Text(text = formatEpochToDate(interval.startDate), style = MaterialTheme.typography.bodySmall)
                                     }
                                 }
                             }
                         }
                     }
                     2 -> {
+                        val bottleColor = MaterialTheme.colorScheme.primary
+                        val slipColor1 = MaterialTheme.colorScheme.tertiary
+                        val slipColor2 = MaterialTheme.colorScheme.onTertiary
                         Column(
                             modifier = Modifier.fillMaxSize().weight(1f),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -277,12 +268,12 @@ fun GroupDetailScreen(
                                         quadraticTo(w * 0.15f, h * 0.92f, w * 0.15f, h * 0.85f); lineTo(w * 0.15f, h * 0.55f)
                                         quadraticTo(w * 0.15f, h * 0.35f, w * 0.35f, h * 0.25f); close()
                                     }
-                                    drawPath(path = path, color = RoseRed, style = Stroke(width = 4.dp.toPx()))
+                                    drawPath(path = path, color = bottleColor, style = Stroke(width = 4.dp.toPx()))
 
                                     val random = Random(42)
                                     for (i in 0 until 12) {
                                         val offset = Offset(x = w * 0.25f + random.nextFloat() * (w * 0.40f), y = h * 0.45f + random.nextFloat() * (h * 0.35f))
-                                        drawRoundRect(color = if (i % 2 == 0) RoseRed else Color.White, topLeft = offset, size = Size(w * 0.1f, h * 0.04f), cornerRadius = CornerRadius(2.dp.toPx()), style = Stroke(width = 1.dp.toPx()))
+                                        drawRoundRect(color = if (i % 2 == 0) slipColor1 else slipColor2, topLeft = offset, size = Size(w * 0.1f, h * 0.04f), cornerRadius = CornerRadius(2.dp.toPx()), style = Stroke(width = 1.dp.toPx()))
                                     }
                                 }
                             }
@@ -306,7 +297,6 @@ fun GroupDetailScreen(
                                     }
                                 },
                                 enabled = !isDrawing && groupState.isReadyToKocok,
-                                colors = ButtonDefaults.buttonColors(containerColor = RoseRed),
                                 shape = CircleShape,
                                 modifier = Modifier.fillMaxWidth().height(56.dp)
                             ) {
@@ -358,14 +348,13 @@ fun GroupDetailScreen(
                 ConfettiCanvas(modifier = Modifier.fillMaxSize())
                 Card(
                     shape = RoundedCornerShape(28.dp),
-                    colors = CardDefaults.cardColors(containerColor = WarmBackground),
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text(text = "Selamat! 🎉", style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold), color = RoseRed)
+                        Text(text = "Selamat! 🎉", style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
                         Text(text = winningMemberState!!.displayName, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold), textAlign = TextAlign.Center)
                         Text(text = "Telah memenangkan Arisan kelompok ${groupState?.group?.name}", textAlign = TextAlign.Center)
-                        Button(onClick = { showCelebrationDialog = false }, shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = RoseRed)) {
+                        Button(onClick = { showCelebrationDialog = false }, shape = CircleShape) {
                             Text("Mantap")
                         }
                     }
@@ -380,7 +369,6 @@ fun RosterRowItem(item: MemberPaymentState, onClick: () -> Unit, onSendReminder:
     val locale = LocalConfiguration.current.locales[0]
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = WarmSurface),
         modifier = Modifier.fillMaxWidth().clickable { onClick() }
     ) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -392,11 +380,11 @@ fun RosterRowItem(item: MemberPaymentState, onClick: () -> Unit, onSendReminder:
                     PaymentState.DITALANGI -> "Ditalangi"
                     PaymentState.UNPAID -> "Belum Bayar"
                 }
-                Text(text = statusText, color = if (item.state == PaymentState.PAID) Color(0xFF2E7D32) else RoseRed, fontWeight = FontWeight.Bold)
+                Text(text = statusText, color = if (item.state == PaymentState.PAID) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
             }
             if (item.state != PaymentState.PAID) {
-                IconButton(onClick = onSendReminder, modifier = Modifier.background(RoseContainer, CircleShape).size(36.dp)) {
-                    Icon(imageVector = Icons.Default.Chat, contentDescription = null, tint = RoseRed, modifier = Modifier.size(16.dp))
+                IconButton(onClick = onSendReminder, modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape).size(36.dp)) {
+                    Icon(imageVector = Icons.Default.Chat, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(16.dp))
                 }
             }
         }
