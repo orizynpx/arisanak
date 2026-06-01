@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -81,18 +82,44 @@ fun ProfilSettingsScreen(
 //            }
 
             SettingsSection("Template Pesan") {
+                var localReminder by remember { mutableStateOf(settings?.reminderTemplate ?: "") }
+                var localWin by remember { mutableStateOf(settings?.winTemplate ?: "") }
+                var isReminderFocused by remember { mutableStateOf(false) }
+                var isWinFocused by remember { mutableStateOf(false) }
+
+                LaunchedEffect(settings?.reminderTemplate) {
+                    if (!isReminderFocused) {
+                        settings?.reminderTemplate?.let { localReminder = it }
+                    }
+                }
+                LaunchedEffect(settings?.winTemplate) {
+                    if (!isWinFocused) {
+                        settings?.winTemplate?.let { localWin = it }
+                    }
+                }
+
                 OutlinedTextField(
-                    value = settings?.reminderTemplate ?: "",
-                    onValueChange = { viewModel.updateReminderTemplate(it) },
+                    value = localReminder,
+                    onValueChange = { 
+                        localReminder = it
+                        viewModel.updateReminderTemplate(it) 
+                    },
                     label = { Text("Template Tagihan") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { isReminderFocused = it.isFocused },
                     maxLines = 3
                 )
                 OutlinedTextField(
-                    value = settings?.winTemplate ?: "",
-                    onValueChange = { viewModel.updateWinTemplate(it) },
+                    value = localWin,
+                    onValueChange = { 
+                        localWin = it
+                        viewModel.updateWinTemplate(it) 
+                    },
                     label = { Text("Template Pemenang") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { isWinFocused = it.isFocused },
                     maxLines = 3
                 )
             }
@@ -118,18 +145,39 @@ fun ProfileHeader(name: String, onNameChange: (String) -> Unit) {
             }
             Column(modifier = Modifier.weight(1f)) {
                 var isEditing by remember { mutableStateOf(false) }
+                var localName by remember { mutableStateOf(name) }
+
+                // Sync from remote only when not editing
+                LaunchedEffect(name, isEditing) {
+                    if (!isEditing) {
+                        localName = name
+                    }
+                }
+
                 if (isEditing) {
                     OutlinedTextField(
-                        value = name,
-                        onValueChange = onNameChange,
+                        value = localName,
+                        onValueChange = { localName = it },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        trailingIcon = { IconButton(onClick = { isEditing = false }) { Icon(Icons.Default.Check, null) } }
+                        trailingIcon = { 
+                            IconButton(onClick = { 
+                                onNameChange(localName)
+                                isEditing = false 
+                            }) { 
+                                Icon(Icons.Default.Check, null) 
+                            } 
+                        }
                     )
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        IconButton(onClick = { isEditing = true }) { Icon(Icons.Default.Edit, null, modifier = Modifier.size(16.dp)) }
+                        IconButton(onClick = { 
+                            localName = name
+                            isEditing = true 
+                        }) { 
+                            Icon(Icons.Default.Edit, null, modifier = Modifier.size(16.dp)) 
+                        }
                     }
                 }
                 Text(text = "Bandar Arisan", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
