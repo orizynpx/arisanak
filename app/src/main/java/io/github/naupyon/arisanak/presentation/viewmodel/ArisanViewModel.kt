@@ -191,6 +191,29 @@ class ArisanViewModel @Inject constructor(
             } else null
         }
 
+        val winnerHistory = intervals.mapNotNull { interval ->
+            if (interval.winnerMemberId == null) return@mapNotNull null
+            val group = groups.find { it.id == interval.groupId } ?: return@mapNotNull null
+            val member = members.find { it.id == interval.winnerMemberId } ?: return@mapNotNull null
+            
+            // For winners, we use a negative ID to avoid conflicts with logs
+            // and we set amount to target pot at that time? 
+            // Or just a placeholder for now.
+            TransactionHistoryItem(
+                id = -interval.id - 1000000, 
+                memberId = member.id,
+                intervalId = interval.id,
+                memberName = member.displayName,
+                groupName = group.name,
+                amount = 0.0, // We could calculate pot here if needed
+                isDitalangi = false,
+                timestamp = interval.startDate + 1, // slightly after start
+                formattedDate = "Pemenang Putaran",
+                status = PaymentState.PAID,
+                receiptImagePath = null
+            )
+        }
+
         val unpaidHistory = members.mapNotNull { member ->
             val group = groups.find { it.id == member.groupId } ?: return@mapNotNull null
             val activeInterval = intervals.filter { it.groupId == group.id }.find { !it.isCompleted } ?: return@mapNotNull null
@@ -213,7 +236,7 @@ class ArisanViewModel @Inject constructor(
             } else null
         }
 
-        (loggedHistory + unpaidHistory).sortedByDescending { it.timestamp }
+        (loggedHistory + winnerHistory + unpaidHistory).sortedByDescending { it.timestamp }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun createGroup(name: String, frequency: ArisanFrequency, baseDue: Double, members: List<Pair<String, String?>>) {
