@@ -1,7 +1,10 @@
 package io.github.naupyon.arisanak.presentation.ui.screens
 
 import android.widget.Toast
-import androidx.compose.animation.*
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import io.github.naupyon.arisanak.presentation.ui.utils.PdfExportUtils
+import io.github.naupyon.arisanak.domain.model.Interval
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -43,6 +46,7 @@ import io.github.naupyon.arisanak.presentation.ui.theme.*
 import io.github.naupyon.arisanak.presentation.viewmodel.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.random.Random
 
@@ -75,6 +79,24 @@ fun GroupDetailScreen(
     val rotationAnim = remember { Animatable(0f) }
     val translationX = remember { Animatable(0f) }
 
+    val createPdfLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/pdf"),
+        onResult = { uri ->
+            uri?.let {
+                context.contentResolver.openOutputStream(it)?.use { os ->
+                    if (groupState != null) {
+                        PdfExportUtils.generateGroupRecapPdf(
+                            outputStream = os,
+                            groupState = groupState,
+                            intervals = intervals
+                        )
+                        Toast.makeText(context, "PDF berhasil disimpan", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -88,6 +110,14 @@ fun GroupDetailScreen(
                     if (activeTabIdx == 0) {
                         IconButton(onClick = { showAddMemberDialog = true }) {
                             Icon(imageVector = Icons.Default.PersonAdd, contentDescription = "Tambah Anggota")
+                        }
+                    }
+                    if (activeTabIdx == 1) {
+                        IconButton(onClick = {
+                            val fileName = "Rekap_${groupState?.group?.name}_${SimpleDateFormat("yyyyMMdd", locale).format(Date())}.pdf"
+                            createPdfLauncher.launch(fileName)
+                        }) {
+                            Icon(imageVector = Icons.Default.PictureAsPdf, contentDescription = "Export PDF")
                         }
                     }
                 }
@@ -149,8 +179,11 @@ fun GroupDetailScreen(
                             }
                         }
 
-                        val activeWinner = groupState.members.find { it.member.id == groupState.activeInterval?.winnerMemberId }
-                        if (activeWinner != null) {
+                        val latestWinnerInterval = intervals.filter { it.winnerMemberId != null }.maxByOrNull { it.sequenceNumber }
+                        val winnerState = latestWinnerInterval?.winnerMemberId?.let { winnerId ->
+                            groupState.members.find { it.member.id == winnerId }
+                        }
+                        if (winnerState != null) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -158,14 +191,27 @@ fun GroupDetailScreen(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(MaterialTheme.colorScheme.tertiaryContainer)
-                                    .padding(12.dp)
+                                    .padding(horizontal = 12.dp, vertical = 8.dp)
                             ) {
                                 Icon(imageVector = Icons.Default.Casino, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.size(20.dp))
                                 Text(
-                                    text = "Pemenang: ${activeWinner.member.displayName}",
+                                    text = "Pemenang: ${winnerState.member.displayName}",
                                     color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f)
                                 )
+                                IconButton(onClick = {
+                                    val settings = viewModel.settings.value
+                                    val template = settings?.winTemplate ?: "Selamat [NamaAnggota]! Anda menang Arisan [NamaGrup] sebesar Rp [TotalPot]"
+                                    val msg = template
+                                        .replace("[NamaAnggota]", winnerState.member.displayName)
+                                        .replace("[NamaGrup]", groupState.group.name)
+                                        .replace("[TotalPot]", String.format(locale, "%,.0f", groupState.targetPot))
+                                    
+                                    launchWhatsApp(context, winnerState.member.phoneNumber, msg)
+                                }) {
+                                    Icon(imageVector = Icons.AutoMirrored.Filled.Chat, contentDescription = "Chat Winner", tint = MaterialTheme.colorScheme.onTertiaryContainer)
+                                }
                             }
                         }
 
@@ -242,6 +288,20 @@ fun GroupDetailScreen(
                                             Text(text = "Putaran #${interval.sequenceNumber}", fontWeight = FontWeight.Bold)
                                             Text(text = "Pemenang: ${winner?.member?.displayName ?: "Unknown"}")
                                         }
+                                        if (winner != null) {
+                                            IconButton(onClick = {
+                                                val settings = viewModel.settings.value
+                                                val template = settings?.winTemplate ?: "Selamat [NamaAnggota]! Anda menang Arisan [NamaGrup] sebesar Rp [TotalPot]"
+                                                val msg = template
+                                                    .replace("[NamaAnggota]", winner.member.displayName)
+                                                    .replace("[NamaGrup]", groupState.group.name)
+                                                    .replace("[TotalPot]", String.format(locale, "%,.0f", groupState.targetPot))
+                                                
+                                                launchWhatsApp(context, winner.member.phoneNumber, msg)
+                                            }) {
+                                                Icon(Icons.AutoMirrored.Filled.Chat, "Chat Winner")
+                                            }
+                                        }
                                         Text(text = formatEpochToDate(interval.startDate), style = MaterialTheme.typography.bodySmall)
                                     }
                                 }
@@ -316,8 +376,8 @@ fun GroupDetailScreen(
         if (showAddMemberDialog && groupState != null) {
             AddMemberMidCycleDialog(
                 onDismiss = { showAddMemberDialog = false },
-                onAdd = { name, phone, isCatchUp ->
-                    viewModel.addMemberMidCycle(groupId, name, phone, isCatchUp)
+                onAdd = { name, phone ->
+                    viewModel.addMemberMidCycle(groupId, name, phone)
                     showAddMemberDialog = false
                 }
             )
