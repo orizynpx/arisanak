@@ -205,17 +205,9 @@ class ArisanViewModel @Inject constructor(
         viewModelScope.launch { createGroupUseCase(name, frequency, baseDue, members) }
     }
 
-    fun addMemberMidCycle(groupId: Long, name: String, phone: String?, isCatchUp: Boolean) {
+    fun addMemberMidCycle(groupId: Long, name: String, phone: String?) {
         viewModelScope.launch {
-            val activeInterval = repository.getActiveIntervalForGroupOneShot(groupId) ?: return@launch
-            val memberId = repository.insertMember(Member(groupId = groupId, contactId = null, displayName = name, phoneNumber = phone, customDueAmount = null))
-            if (isCatchUp) {
-                val group = repository.getGroupByIdOneShot(groupId) ?: return@launch
-                val missedCount = activeInterval.sequenceNumber - 1
-                if (missedCount > 0) {
-                    repository.insertPaymentLog(PaymentLog(memberId = memberId, intervalId = activeInterval.id, amountPaid = group.baseDueAmount * missedCount))
-                }
-            }
+            repository.insertMember(Member(groupId = groupId, contactId = null, displayName = name, phoneNumber = phone, customDueAmount = null))
         }
     }
 
