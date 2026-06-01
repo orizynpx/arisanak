@@ -402,10 +402,10 @@ fun MemberActionDialog(
                 }
             }
 
-            HorizontalDivider()
-            TextButton(onClick = { onPrune(); onDismiss() }, modifier = Modifier.align(Alignment.CenterHorizontally), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
-                Icon(Icons.Default.PersonRemove, null); Spacer(Modifier.width(8.dp)); Text("Keluarkan dari Roster")
-            }
+//            HorizontalDivider()
+//            TextButton(onClick = { onPrune(); onDismiss() }, modifier = Modifier.align(Alignment.CenterHorizontally), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
+//                Icon(Icons.Default.PersonRemove, null); Spacer(Modifier.width(8.dp)); Text("Keluarkan dari Roster")
+//            }
         }
     }
 }
