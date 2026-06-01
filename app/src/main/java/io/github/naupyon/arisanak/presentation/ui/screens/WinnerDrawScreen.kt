@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,14 +20,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.naupyon.arisanak.domain.model.Member
 import io.github.naupyon.arisanak.presentation.ui.components.ConfettiCanvas
+import io.github.naupyon.arisanak.presentation.ui.components.launchWhatsApp
 import io.github.naupyon.arisanak.presentation.viewmodel.ArisanViewModel
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +42,8 @@ fun WinnerDrawScreen(
 ) {
     val groups by viewModel.groupsUiState.collectAsState()
     val groupState = groups.find { it.group.id == groupId }
+    val settings by viewModel.settings.collectAsState()
+    val context = LocalContext.current
     
     val scope = rememberCoroutineScope()
     var isDrawing by remember { mutableStateOf(false) }
@@ -158,6 +164,25 @@ fun WinnerDrawScreen(
                         Text(text = "Selamat! 🎉", style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
                         Text(text = winningMemberState!!.displayName, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold), textAlign = TextAlign.Center)
                         Text(text = "Telah memenangkan Arisan kelompok ${groupState?.group?.name}", textAlign = TextAlign.Center)
+                        
+                        if (!winningMemberState!!.phoneNumber.isNullOrBlank()) {
+                            Button(
+                                onClick = {
+                                    val template = settings?.winTemplate ?: "Selamat kepada [NamaAnggota] telah memenangkan kocokan arisan kelompok [NamaGrup]!"
+                                    val msg = template
+                                        .replace("[NamaAnggota]", winningMemberState!!.displayName)
+                                        .replace("[NamaGrup]", groupState?.group?.name ?: "")
+                                    launchWhatsApp(context, winningMemberState!!.phoneNumber, msg)
+                                },
+                                shape = CircleShape,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366), contentColor = Color.White)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.Chat, null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Kabari di WA")
+                            }
+                        }
+
                         Button(onClick = { 
                             showCelebrationDialog = false
                             viewModel.advanceInterval(groupId)
