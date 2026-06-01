@@ -1,6 +1,7 @@
 package io.github.naupyon.arisanak.presentation.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -8,7 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -27,9 +31,21 @@ fun ArisanApp() {
         darkTheme = /*settings?.isDarkMode ?:*/ false,
         dynamicColor = /*settings?.colorMode == "Material You"*/ false
     ) {
+        MaterialExpressiveTheme(
+            colorScheme = MaterialTheme.colorScheme,
+            typography = Typography(
+                displayLarge = TextStyle(fontWeight = FontWeight.Black, fontSize = 50.sp),
+                headlineLarge = TextStyle(fontWeight = FontWeight.ExtraBold)
+            ),
+            shapes = Shapes(
+                medium = RoundedCornerShape(topStart = 28.dp, bottomEnd = 28.dp, topEnd = 4.dp, bottomStart = 4.dp)
+            ),
+            motionScheme = MotionScheme.expressive()
+        ) {
 //        SecurityLockScreen(viewModel = viewModel) {
             MainNavigationShell(viewModel = viewModel)
 //        }
+        }
     }
 }
 
