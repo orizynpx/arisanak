@@ -103,11 +103,10 @@ fun CreateGroupDialog(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     HorizontalDivider()
                     Text(text = "Langkah 2: Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         ArisanFrequency.entries.forEach { freq ->
                             val isSel = freq == selectedFreq
@@ -288,7 +287,7 @@ fun QuickLogPaymentDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditGroupDialog(
     group: Group,
@@ -316,7 +315,11 @@ fun EditGroupDialog(
             )
 
             Text(text = "Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 ArisanFrequency.entries.forEach { freq ->
                     val isSel = freq == selectedFreq
                     FilterChip(
