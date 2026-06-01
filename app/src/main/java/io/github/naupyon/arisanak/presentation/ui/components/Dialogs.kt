@@ -324,11 +324,10 @@ fun MemberActionDialog(
 @Composable
 fun AddMemberMidCycleDialog(
     onDismiss: () -> Unit,
-    onAdd: (String, String?, Boolean) -> Unit
+    onAdd: (String, String?) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
-    var isCatchUp by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -371,23 +370,8 @@ fun AddMemberMidCycleDialog(
             }
 
             AnimatedVisibility(visible = name.trim().length >= 2) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HorizontalDivider()
-                    Text(text = "Langkah 3: Jenis Masuk Mid-Cycle", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).border(1.dp, if (!isCatchUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)).clickable { isCatchUp = false }.padding(12.dp)) {
-                            Column { Text("Fresh", fontWeight = FontWeight.Bold, color = if (!isCatchUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface); Text("Mulai sekarang", fontSize = 10.sp) }
-                        }
-                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).border(1.dp, if (isCatchUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)).clickable { isCatchUp = true }.padding(12.dp)) {
-                            Column { Text("Catch Up", fontWeight = FontWeight.Bold, color = if (isCatchUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface); Text("Bayar mundur", fontSize = 10.sp) }
-                        }
-                    }
-                }
-            }
-
-            AnimatedVisibility(visible = name.trim().length >= 2) {
                 Button(
-                    onClick = { if (name.isNotBlank()) { onAdd(name, formatPhoneNumber(phone), isCatchUp); onDismiss() } },
+                    onClick = { if (name.isNotBlank()) { onAdd(name, formatPhoneNumber(phone)); onDismiss() } },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = CircleShape
                 ) { Text("Simpan", fontWeight = FontWeight.Bold) }
@@ -395,6 +379,7 @@ fun AddMemberMidCycleDialog(
         }
     }
 }
+
 
 @Composable
 fun PiutangRepaymentDialog(
