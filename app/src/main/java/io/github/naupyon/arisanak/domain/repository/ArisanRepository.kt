@@ -33,6 +33,7 @@ interface ArisanRepository {
     fun getPaymentLogsForMember(memberId: Long): Flow<List<PaymentLog>>
     suspend fun insertPaymentLog(paymentLog: PaymentLog): Long
     suspend fun deletePaymentLogById(id: Long)
+    suspend fun deletePaymentLogsForMember(memberId: Long)
     suspend fun deletePaymentLogsForMemberAndInterval(memberId: Long, intervalId: Long)
 
     fun getActivePiutangLogs(): Flow<List<PiutangLog>>

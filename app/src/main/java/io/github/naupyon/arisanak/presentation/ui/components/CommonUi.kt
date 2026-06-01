@@ -49,10 +49,10 @@ fun formatPhoneNumber(phone: String?): String? {
     if (digitsOnly.isEmpty()) return null
 
     return when {
-        digitsOnly.startsWith("0") -> "+62 ${digitsOnly.substring(1)}"
-        digitsOnly.startsWith("62") -> "+62 ${digitsOnly.substring(2)}"
-        digitsOnly.startsWith("8") -> "+62 $digitsOnly"
-        else -> "+$digitsOnly" // Fallback for other potential formats
+        digitsOnly.startsWith("08") -> "+62${digitsOnly.substring(1)}"
+        digitsOnly.startsWith("62") -> "+62${digitsOnly.substring(2)}"
+        digitsOnly.startsWith("8") -> "+62$digitsOnly"
+        else -> "+$digitsOnly" // Fallback
     }
 }
 

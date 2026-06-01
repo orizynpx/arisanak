@@ -10,6 +10,9 @@ data class GroupEntity(
     val frequency: ArisanFrequency,
     @ColumnInfo(name = "base_due_amount") val baseDueAmount: Double,
     @ColumnInfo(name = "current_interval_sequence") val currentIntervalSequence: Int = 1,
+    @ColumnInfo(name = "is_archived") val isArchived: Boolean = false,
+    @ColumnInfo(name = "kas_balance") val kasBalance: Double = 0.0,
+    @ColumnInfo(name = "eligible_kas_winner_ids") val eligibleKasWinnerIds: String = "[]",
     @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -32,6 +35,7 @@ data class MemberEntity(
     @ColumnInfo(name = "display_name") val displayName: String,
     @ColumnInfo(name = "phone_number") val phoneNumber: String?,
     @ColumnInfo(name = "custom_due_amount") val customDueAmount: Double?,
+    @ColumnInfo(name = "start_interval_sequence") val startIntervalSequence: Int = 1,
     @ColumnInfo(name = "has_won") val hasWon: Boolean = false
 )
 
@@ -109,11 +113,11 @@ data class PiutangLogEntity(
 )
 
 // Mappers
-fun GroupEntity.toDomain() = Group(id, name, frequency, baseDueAmount, currentIntervalSequence, createdAt)
-fun Group.toEntity() = GroupEntity(id, name, frequency, baseDueAmount, currentIntervalSequence, createdAt)
+fun GroupEntity.toDomain() = Group(id, name, frequency, baseDueAmount, currentIntervalSequence, isArchived, kasBalance, eligibleKasWinnerIds, createdAt)
+fun Group.toEntity() = GroupEntity(id, name, frequency, baseDueAmount, currentIntervalSequence, isArchived, kasBalance, eligibleKasWinnerIds, createdAt)
 
-fun MemberEntity.toDomain() = Member(id, groupId, contactId, displayName, phoneNumber, customDueAmount, hasWon)
-fun Member.toEntity() = MemberEntity(id, groupId, contactId, displayName, phoneNumber, customDueAmount, hasWon)
+fun MemberEntity.toDomain() = Member(id, groupId, contactId, displayName, phoneNumber, customDueAmount, startIntervalSequence, hasWon)
+fun Member.toEntity() = MemberEntity(id, groupId, contactId, displayName, phoneNumber, customDueAmount, startIntervalSequence, hasWon)
 
 fun IntervalEntity.toDomain() = Interval(id, groupId, sequenceNumber, startDate, isCompleted, winnerMemberId)
 fun Interval.toEntity() = IntervalEntity(id, groupId, sequenceNumber, startDate, isCompleted, winnerMemberId)

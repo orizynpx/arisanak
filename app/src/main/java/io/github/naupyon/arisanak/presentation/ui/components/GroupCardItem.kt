@@ -23,20 +23,18 @@ import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
 @Composable
 fun GroupCardItem(
     groupState: GroupUiState,
-    onCardClick: () -> Unit
+    onCardClick: () -> Unit,
+    isClickable: Boolean = true
 ) {
     Card(
         shape = RoundedCornerShape(28.dp),
-//        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onCardClick() }
+            .then(if (isClickable) Modifier.clickable { onCardClick() } else Modifier)
             .testTag("group_card_${groupState.group.id}"),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            disabledContainerColor = Color.LightGray,
-            disabledContentColor = Color.DarkGray
+            containerColor = if (groupState.group.isArchived) Color.LightGray else MaterialTheme.colorScheme.primaryContainer,
+            contentColor = if (groupState.group.isArchived) Color.DarkGray else MaterialTheme.colorScheme.onPrimaryContainer
         )
     ) {
         Column(
@@ -60,7 +58,7 @@ fun GroupCardItem(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Putaran #${groupState.group.currentIntervalSequence}",
+                        text = "Putaran ${groupState.group.currentIntervalSequence}/${groupState.totalCycles}",
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -76,13 +74,17 @@ fun GroupCardItem(
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .background(
+                            if (groupState.group.isArchived) Color.Gray 
+                            else if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primary 
+                            else MaterialTheme.colorScheme.secondary
+                        )
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = if (groupState.isReadyToKocok) "Siap Kocok" else "Kas Belum Siap",
+                        text = if (groupState.group.isArchived) "Selesai" else if (groupState.isReadyToKocok) "Siap Kocok" else "Berjalan",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = if (groupState.isReadyToKocok) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
+                        color = if (groupState.group.isArchived) Color.White else if (groupState.isReadyToKocok) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
                     )
                 }
             }
@@ -117,27 +119,6 @@ fun GroupCardItem(
                     trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
                     color = MaterialTheme.colorScheme.primary
                 )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onCardClick,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primary)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Casino,
-                        contentDescription = "Kocok Botol",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
             }
         }
     }

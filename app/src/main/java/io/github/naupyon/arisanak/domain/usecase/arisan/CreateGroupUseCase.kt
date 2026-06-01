@@ -23,6 +23,7 @@ class CreateGroupUseCase @Inject constructor(
                 displayName = name,
                 phoneNumber = phone,
                 customDueAmount = null,
+                startIntervalSequence = 1,
                 hasWon = false
             )
         }

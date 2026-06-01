@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import io.github.naupyon.arisanak.presentation.viewmodel.*
 import io.github.naupyon.arisanak.presentation.ui.theme.*
 import io.github.naupyon.arisanak.presentation.ui.components.QuickLogPaymentDialog
+import io.github.naupyon.arisanak.presentation.ui.components.GroupCardItem
 import androidx.compose.ui.text.style.TextOverflow
 import java.util.Locale
 
@@ -149,13 +150,7 @@ fun HomeScreen(
                     if (groups.isEmpty()) {
                         Card(
                             shape = RoundedCornerShape(24.dp),
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                disabledContainerColor = Color.LightGray,
-                                disabledContentColor = Color.DarkGray
-                            )
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Box(
                                 modifier = Modifier
@@ -175,82 +170,11 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             items(groups) { groupState ->
-                                Card(
-                                    shape = RoundedCornerShape(28.dp),
-                                    modifier = Modifier
-                                        .width(300.dp)
-                                        .clickable { onNavigateToGroup(groupState.group.id) },
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        disabledContainerColor = Color.LightGray,
-                                        disabledContentColor = Color.DarkGray
+                                Box(modifier = Modifier.width(300.dp)) {
+                                    GroupCardItem(
+                                        groupState = groupState,
+                                        onCardClick = { onNavigateToGroup(groupState.group.id) }
                                     )
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(20.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.Top
-                                        ) {
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Text(
-                                                    text = groupState.group.name,
-                                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                                Text(
-                                                    text = "Putaran #${groupState.group.currentIntervalSequence}",
-                                                    style = MaterialTheme.typography.bodySmall
-                                                )
-                                            }
-                                            Box(
-                                                modifier = Modifier
-                                                    .padding(start = 8.dp)
-                                                    .clip(CircleShape)
-                                                    .background(MaterialTheme.colorScheme.secondary)
-                                                    .padding(horizontal = 10.dp, vertical = 4.dp)
-                                            ) {
-                                                Text(
-                                                    text = if (groupState.isReadyToKocok) "Siap Kocok" else "Berjalan",
-                                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                                    maxLines = 1,
-                                                    color = MaterialTheme.colorScheme.onSecondary
-                                                )
-                                            }
-                                        }
-                                        val progress = if (groupState.targetPot > 0) (groupState.collectedAmount / groupState.targetPot).toFloat() else 0f
-                                        LinearProgressIndicator(
-                                            progress = { progress },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(8.dp)
-                                                .clip(CircleShape)
-                                                .border(
-                                                    width = 1.dp,
-                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                                    shape = CircleShape
-                                                ),
-                                            trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                                            horizontalArrangement = Arrangement.End
-                                        ) {
-                                            IconButton(
-                                                onClick = { onNavigateToGroup(groupState.group.id) },
-                                                modifier = Modifier.size(44.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.primary)
-                                            ) {
-                                                Icon(imageVector = Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onPrimary)
-                                            }
-                                        }
-                                    }
                                 }
                             }
                         }

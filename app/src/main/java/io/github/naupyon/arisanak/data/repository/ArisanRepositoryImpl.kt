@@ -89,6 +89,9 @@ class ArisanRepositoryImpl @Inject constructor(
     override suspend fun deletePaymentLogById(id: Long) = 
         dao.deletePaymentLogById(id)
 
+    override suspend fun deletePaymentLogsForMember(memberId: Long) = 
+        dao.deletePaymentLogsForMember(memberId)
+
     override suspend fun deletePaymentLogsForMemberAndInterval(memberId: Long, intervalId: Long) = 
         dao.deletePaymentLogsForMemberAndInterval(memberId, intervalId)
 

@@ -88,6 +88,9 @@ interface ArisanDao {
     @Query("DELETE FROM payment_log WHERE id = :id")
     suspend fun deletePaymentLogById(id: Long)
 
+    @Query("DELETE FROM payment_log WHERE member_id = :memberId")
+    suspend fun deletePaymentLogsForMember(memberId: Long)
+
     @Query("DELETE FROM payment_log WHERE member_id = :memberId AND interval_id = :intervalId")
     suspend fun deletePaymentLogsForMemberAndInterval(memberId: Long, intervalId: Long)
 

@@ -151,6 +151,45 @@ fun MainNavigationShell(viewModel: ArisanViewModel) {
                 GroupDetailScreen(
                     groupId = groupId,
                     viewModel = viewModel,
+                    onNavigateToKocok = { id -> navController.navigate("group_kocok/$id") },
+                    onNavigateToMembers = { id -> navController.navigate("group_members/$id") },
+                    onNavigateToHistory = { id -> navController.navigate("group_history/$id") },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "group_kocok/{groupId}",
+                arguments = listOf(navArgument("groupId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val groupId = backStackEntry.arguments?.getLong("groupId") ?: 0L
+                WinnerDrawScreen(
+                    groupId = groupId,
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "group_members/{groupId}",
+                arguments = listOf(navArgument("groupId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val groupId = backStackEntry.arguments?.getLong("groupId") ?: 0L
+                ManageMembersScreen(
+                    groupId = groupId,
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "group_history/{groupId}",
+                arguments = listOf(navArgument("groupId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val groupId = backStackEntry.arguments?.getLong("groupId") ?: 0L
+                RiwayatArisanScreen(
+                    groupId = groupId,
+                    viewModel = viewModel,
                     onBack = { navController.popBackStack() }
                 )
             }

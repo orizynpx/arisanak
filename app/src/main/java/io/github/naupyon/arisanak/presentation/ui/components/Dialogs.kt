@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import io.github.naupyon.arisanak.domain.model.ArisanFrequency
+import io.github.naupyon.arisanak.domain.model.Group
 import io.github.naupyon.arisanak.presentation.ui.theme.*
 import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
 import io.github.naupyon.arisanak.presentation.viewmodel.MemberPaymentState
@@ -289,12 +290,74 @@ fun QuickLogPaymentDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun EditGroupDialog(
+    group: Group,
+    onDismiss: () -> Unit,
+    onUpdate: (Group) -> Unit
+) {
+    var name by remember { mutableStateOf(group.name) }
+    var baseDueStr by remember { mutableStateOf(group.baseDueAmount.toString()) }
+    var selectedFreq by remember { mutableStateOf(group.frequency) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(text = "Edit Kelompok", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+
+            OutlinedTextField(
+                value = name, onValueChange = { name = it }, label = { Text("Nama Kelompok") }, 
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)
+            )
+
+            Text(text = "Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ArisanFrequency.entries.forEach { freq ->
+                    val isSel = freq == selectedFreq
+                    FilterChip(
+                        selected = isSel,
+                        onClick = { selectedFreq = freq },
+                        label = { Text(freq.label) },
+                        shape = CircleShape
+                    )
+                }
+            }
+
+            OutlinedTextField(
+                value = baseDueStr, onValueChange = { baseDueStr = it }, label = { Text("Iuran Dasar") }, prefix = { Text("Rp ") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)
+            )
+
+            Button(
+                onClick = { 
+                    baseDueStr.toDoubleOrNull()?.let { amount ->
+                        onUpdate(group.copy(name = name, frequency = selectedFreq, baseDueAmount = amount))
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = CircleShape
+            ) {
+                Text("Update", fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun MemberActionDialog(
     item: MemberPaymentState,
     onDismiss: () -> Unit,
     onFullPay: () -> Unit,
     onInstallment: (Double) -> Unit,
     onTalangi: () -> Unit,
+    onRevoke: () -> Unit,
     onPrune: () -> Unit
 ) {
     var customAmt by remember { mutableStateOf("") }
@@ -309,29 +372,37 @@ fun MemberActionDialog(
         Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(text = "Catat Transaksi: ${item.member.displayName}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             
-            Button(onClick = { onFullPay(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))) {
-                Icon(Icons.Default.Check, null); Spacer(Modifier.width(8.dp)); Text("Lunas Instan (Rp ${item.sisa})")
+            if (item.state == PaymentState.UNPAID || item.state == PaymentState.PARTIAL) {
+                Button(onClick = { onFullPay(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))) {
+                    Icon(Icons.Default.Check, null); Spacer(Modifier.width(8.dp)); Text("Lunas Instan (Rp ${item.sisa})")
+                }
+
+                HorizontalDivider()
+                OutlinedTextField(
+                    value = customAmt, onValueChange = { customAmt = it }, label = { Text("Jumlah Angsuran (Rp)") }, 
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done), 
+                    keyboardActions = KeyboardActions(onDone = { 
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                    }),
+                    singleLine = true, modifier = Modifier.fillMaxWidth()
+                )
+                Button(onClick = { customAmt.toDoubleOrNull()?.let { onInstallment(it); onDismiss() } }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape) {
+                    Text("Simpan Angsuran")
+                }
+
+                HorizontalDivider()
+                Button(onClick = { onTalangi(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape) {
+                    Icon(Icons.Default.Paid, null); Spacer(Modifier.width(8.dp)); Text("Talangi (Bail out)")
+                }
+            } else {
+                // Already paid or ditalangi, show revoke
+                Button(onClick = { onRevoke(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
+                    Icon(Icons.Default.Undo, null); Spacer(Modifier.width(8.dp)); Text("Revoke Pembayaran")
+                }
             }
 
             HorizontalDivider()
-            OutlinedTextField(
-                value = customAmt, onValueChange = { customAmt = it }, label = { Text("Jumlah Angsuran (Rp)") }, 
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done), 
-                keyboardActions = KeyboardActions(onDone = { 
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                }),
-                singleLine = true, modifier = Modifier.fillMaxWidth()
-            )
-            Button(onClick = { customAmt.toDoubleOrNull()?.let { onInstallment(it); onDismiss() } }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape) {
-                Text("Simpan Angsuran")
-            }
-
-            HorizontalDivider()
-            Button(onClick = { onTalangi(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape) {
-                Icon(Icons.Default.Paid, null); Spacer(Modifier.width(8.dp)); Text("Talangi (Bail out)")
-            }
-
             TextButton(onClick = { onPrune(); onDismiss() }, modifier = Modifier.align(Alignment.CenterHorizontally), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
                 Icon(Icons.Default.PersonRemove, null); Spacer(Modifier.width(8.dp)); Text("Keluarkan dari Roster")
             }
@@ -362,7 +433,7 @@ fun AddMemberMidCycleDialog(
             if (uri != null) {
                 parseContactResult(context, uri)?.let { (cName, cPhone) ->
                     name = cName
-                    phone = cPhone ?: ""
+                    phone = cPhone?.replace("+62", "0") ?: ""
                 }
             }
         }
@@ -378,7 +449,7 @@ fun AddMemberMidCycleDialog(
         }
 
         Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(text = "Tambah Roster Baru Mid-Cycle", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text(text = "Tambah Member Baru", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(
@@ -386,7 +457,7 @@ fun AddMemberMidCycleDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Langkah 1: Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
+                    Text(text = "Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     TextButton(onClick = {
                         if (context.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                             contactPickerLauncher.launch(null)
@@ -406,34 +477,27 @@ fun AddMemberMidCycleDialog(
                 )
             }
 
-            AnimatedVisibility(visible = name.trim().length >= 2) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    HorizontalDivider()
-                    Text(text = "Langkah 2: WhatsApp (Opsional)", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
-                    OutlinedTextField(
-                        value = phone, onValueChange = { phone = it }, placeholder = { Text("08...") }, singleLine = true, 
-                        modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = { 
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
-                        }),
-                        supportingText = {
-                            formatPhoneNumber(phone)?.let {
-                                Text("Format WA: $it", style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                    )
-                }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = "WhatsApp (Opsional)", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
+                OutlinedTextField(
+                    value = phone, onValueChange = { phone = it }, placeholder = { Text("08...") }, singleLine = true, 
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { 
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                    }),
+                    supportingText = {
+                        Text("Format: 08...", style = MaterialTheme.typography.labelSmall)
+                    }
+                )
             }
 
-            AnimatedVisibility(visible = name.trim().length >= 2) {
-                Button(
-                    onClick = { if (name.isNotBlank()) { onAdd(name, formatPhoneNumber(phone)); onDismiss() } },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = CircleShape
-                ) { Text("Simpan", fontWeight = FontWeight.Bold) }
-            }
+            Button(
+                onClick = { if (name.isNotBlank()) { onAdd(name, formatPhoneNumber(phone)); onDismiss() } },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = CircleShape
+            ) { Text("Simpan", fontWeight = FontWeight.Bold) }
         }
     }
 }

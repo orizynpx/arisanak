@@ -7,5 +7,6 @@ data class Member(
     val displayName: String,
     val phoneNumber: String?,
     val customDueAmount: Double?,
+    val startIntervalSequence: Int = 1,
     val hasWon: Boolean = false
 )

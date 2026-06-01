@@ -10,6 +10,7 @@ data class MemberPaymentState(
     val member: Member,
     val requiredDue: Double,
     val amountPaid: Double,
+    val eligiblePot: Double,
     val state: PaymentState,
     val sisa: Double
 )
@@ -20,6 +21,7 @@ data class GroupUiState(
     val members: List<MemberPaymentState>,
     val targetPot: Double,
     val collectedAmount: Double,
+    val totalCycles: Int,
     val isReadyToKocok: Boolean,
     val statusText: String
 )
@@ -34,6 +36,8 @@ data class PiutangDebtorState(
 
 data class TransactionHistoryItem(
     val id: Long,
+    val memberId: Long,
+    val intervalId: Long,
     val memberName: String,
     val groupName: String,
     val amount: Double,

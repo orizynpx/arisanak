@@ -12,7 +12,7 @@ import io.github.naupyon.arisanak.domain.model.ArisanFrequency
         PaymentLogEntity::class,
         PiutangLogEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

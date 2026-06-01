@@ -55,12 +55,18 @@ class ArisanViewModel @Inject constructor(
             val activeInterval = intervals.find { !it.isCompleted } ?: intervals.firstOrNull()
             
             if (activeInterval == null) {
-                GroupUiState(group, null, emptyList(), 0.0, 0.0, false, "Selesai")
+                GroupUiState(group, null, emptyList(), 0.0, 0.0, members.size, false, "Selesai")
             } else {
+                val totalCycles = members.size
                 val logs = allLogs.filter { it.intervalId == activeInterval.id }
                 val memberStates = members.map { member ->
                     val memberLogs = logs.filter { it.memberId == member.id }
                     val requiredDue = member.customDueAmount ?: group.baseDueAmount
+                    
+                    // Eligible pot calculation
+                    val remainingCycles = (totalCycles - (member.startIntervalSequence - 1)).coerceAtLeast(1)
+                    val eligiblePot = requiredDue * remainingCycles
+
                     val isDitalangi = memberLogs.any { it.isDitalangi }
                     val totalPaid = memberLogs.sumOf { it.amountPaid }
 
@@ -85,12 +91,16 @@ class ArisanViewModel @Inject constructor(
                         member = member,
                         requiredDue = requiredDue,
                         amountPaid = totalPaid,
+                        eligiblePot = eligiblePot,
                         state = state,
                         sisa = (requiredDue - totalPaid).coerceAtLeast(0.0)
                     )
                 }
 
-                val targetPot = memberStates.sumOf { it.requiredDue }
+                val currentWinner = members.find { it.id == activeInterval.winnerMemberId }
+                val currentWinnerState = memberStates.find { it.member.id == currentWinner?.id }
+                val targetPot = currentWinnerState?.eligiblePot ?: memberStates.sumOf { it.requiredDue }
+                
                 val collectedAmount = logs.sumOf { it.amountPaid }
                 val allCompleted = memberStates.all { it.state == PaymentState.PAID || it.state.name.startsWith("DITALANGI") }
 
@@ -100,6 +110,7 @@ class ArisanViewModel @Inject constructor(
                     members = memberStates,
                     targetPot = targetPot,
                     collectedAmount = collectedAmount,
+                    totalCycles = totalCycles,
                     isReadyToKocok = allCompleted,
                     statusText = if (allCompleted) "Waktunya Kocok" else "Kas Belum Lengkap"
                 )
@@ -166,6 +177,8 @@ class ArisanViewModel @Inject constructor(
 
                 TransactionHistoryItem(
                     id = log.id,
+                    memberId = log.memberId,
+                    intervalId = log.intervalId,
                     memberName = member.displayName,
                     groupName = group.name,
                     amount = log.amountPaid,
@@ -186,6 +199,8 @@ class ArisanViewModel @Inject constructor(
             if (memberLogs.isEmpty()) {
                 TransactionHistoryItem(
                     id = -member.id,
+                    memberId = member.id,
+                    intervalId = activeInterval.id,
                     memberName = member.displayName,
                     groupName = group.name,
                     amount = 0.0,
@@ -205,14 +220,65 @@ class ArisanViewModel @Inject constructor(
         viewModelScope.launch { createGroupUseCase(name, frequency, baseDue, members) }
     }
 
+    fun deleteGroup(groupId: Long) = viewModelScope.launch {
+        val group = repository.getGroupByIdOneShot(groupId) ?: return@launch
+        repository.deleteGroup(group)
+    }
+
+    fun updateGroup(group: Group) = viewModelScope.launch {
+        repository.updateGroup(group)
+    }
+
+    fun updateMember(member: Member) = viewModelScope.launch {
+        repository.updateMember(member)
+    }
+
+    fun revokePayment(memberId: Long, intervalId: Long) = viewModelScope.launch {
+        repository.deletePaymentLogsForMemberAndInterval(memberId, intervalId)
+    }
+
     fun addMemberMidCycle(groupId: Long, name: String, phone: String?) {
         viewModelScope.launch {
-            repository.insertMember(Member(groupId = groupId, contactId = null, displayName = name, phoneNumber = phone, customDueAmount = null))
+            val group = repository.getGroupByIdOneShot(groupId) ?: return@launch
+            val members = repository.getMembersForGroupOneShot(groupId)
+            
+            // Track members who won before this new member joined
+            val currentWinners = members.filter { it.hasWon }.map { it.id }
+            val existingEligible = group.eligibleKasWinnerIds
+                .removeSurrounding("[", "]")
+                .split(",")
+                .filter { it.isNotBlank() }
+                .map { it.trim().toLong() }
+            
+            val updatedEligible = (existingEligible + currentWinners).distinct()
+            val eligibleJson = "[${updatedEligible.joinToString(",")}]"
+            
+            repository.updateGroup(group.copy(eligibleKasWinnerIds = eligibleJson))
+
+            repository.insertMember(Member(
+                groupId = groupId, 
+                contactId = null, 
+                displayName = name, 
+                phoneNumber = phone, 
+                customDueAmount = null,
+                startIntervalSequence = group.currentIntervalSequence
+            ))
         }
     }
 
     fun removeMember(member: Member) = viewModelScope.launch {
-        repository.updateMember(member.copy(groupId = null))
+        if (member.hasWon) return@launch // restriction
+        
+        // If removed, contributions go to kas
+        val logs = repository.getPaymentLogsForMember(member.id).firstOrNull() ?: emptyList()
+        val totalContributed = logs.sumOf { it.amountPaid }
+        
+        val group = member.groupId?.let { repository.getGroupByIdOneShot(it) }
+        if (group != null && totalContributed > 0) {
+            repository.updateGroup(group.copy(kasBalance = group.kasBalance + totalContributed))
+        }
+        
+        repository.deleteMember(member)
     }
 
     fun payCustomAmount(memberId: Long, intervalId: Long, amount: Double, imagePath: String? = null) = viewModelScope.launch {
