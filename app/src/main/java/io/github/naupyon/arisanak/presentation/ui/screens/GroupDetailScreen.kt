@@ -165,7 +165,8 @@ fun GroupDetailScreen(
                 groupState.members.forEach { item ->
                     RosterRowItem(
                         item = item,
-                        onClick = { selectedMemberForAction = item },
+                        isGroupArchived = groupState.group.isArchived,
+                        onClick = { if (!groupState.group.isArchived) selectedMemberForAction = item },
                         onSendReminder = {
                             val settings = viewModel.settings.value
                             val template = settings?.reminderTemplate ?: "Halo [NamaAnggota], tagihan Anda Rp [SisaTagihan]"
@@ -275,11 +276,20 @@ fun GroupActionButton(
 }
 
 @Composable
-fun RosterRowItem(item: MemberPaymentState, onClick: () -> Unit, onSendReminder: () -> Unit) {
+fun RosterRowItem(
+    item: MemberPaymentState, 
+    isGroupArchived: Boolean = false,
+    onClick: () -> Unit, 
+    onSendReminder: () -> Unit
+) {
     val locale = LocalConfiguration.current.locales[0]
     Card(
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth().clickable { onClick() }
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isGroupArchived) Color(0xFFE0E0E0) else MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = if (isGroupArchived) Color.Gray else MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
