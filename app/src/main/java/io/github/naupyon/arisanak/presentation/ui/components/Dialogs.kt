@@ -1,5 +1,8 @@
 package io.github.naupyon.arisanak.presentation.ui.components
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -61,6 +64,16 @@ fun CreateGroupDialog(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            contactPickerLauncher.launch(null)
+        } else {
+            Toast.makeText(context, "Izin kontak diperlukan untuk fitur ini", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -150,7 +163,13 @@ fun CreateGroupDialog(
                         )
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { contactPickerLauncher.launch(null) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
+                        Button(onClick = {
+                            if (context.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                                contactPickerLauncher.launch(null)
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                            }
+                        }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
                             Icon(Icons.Default.Contacts, null, modifier = Modifier.size(16.dp)); Text("Kontak", fontSize = 11.sp)
                         }
                         Button(onClick = { if (freshMemberName.isNotBlank()) { membersList.add(freshMemberName to formatPhoneNumber(freshMemberPhone)); freshMemberName = ""; freshMemberPhone = "" } }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
@@ -336,11 +355,50 @@ fun AddMemberMidCycleDialog(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
     ) {
+        val context = LocalContext.current
+        val contactPickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickContact()
+        ) { uri ->
+            if (uri != null) {
+                parseContactResult(context, uri)?.let { (cName, cPhone) ->
+                    name = cName
+                    phone = cPhone ?: ""
+                }
+            }
+        }
+
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                contactPickerLauncher.launch(null)
+            } else {
+                Toast.makeText(context, "Izin kontak diperlukan untuk fitur ini", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(text = "Tambah Roster Baru Mid-Cycle", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = "Langkah 1: Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Langkah 1: Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
+                    TextButton(onClick = {
+                        if (context.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                            contactPickerLauncher.launch(null)
+                        } else {
+                            permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                        }
+                    }) {
+                        Icon(Icons.Default.ContactPage, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Pilih Kontak", fontSize = 12.sp)
+                    }
+                }
                 OutlinedTextField(
                     value = name, onValueChange = { name = it }, placeholder = { Text("Nama") }, singleLine = true, 
                     modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
