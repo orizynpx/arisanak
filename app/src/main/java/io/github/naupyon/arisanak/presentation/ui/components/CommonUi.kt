@@ -60,34 +60,60 @@ fun parseContactResult(context: Context, contactUri: Uri): Pair<String, String?>
     var name: String? = null
     var phone: String? = null
     val cr = context.contentResolver
-    cr.query(contactUri, null, null, null, null)?.use { cursor ->
-        if (cursor.moveToFirst()) {
-            val nameIdx = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
-            if (nameIdx >= 0) name = cursor.getString(nameIdx)
 
-            val idIdx = cursor.getColumnIndex(ContactsContract.Contacts._ID)
-            if (idIdx >= 0) {
-                val id = cursor.getString(idIdx)
-                val hasPhoneIdx = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)
-                val hasPhone = if (hasPhoneIdx >= 0) cursor.getString(hasPhoneIdx) else "0"
-                if (hasPhone == "1") {
+    try {
+        // Query the contact URI directly first to get basic info
+        cr.query(contactUri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                // Try to find the display name
+                val nameIdx = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
+                if (nameIdx >= 0) {
+                    name = cursor.getString(nameIdx)
+                }
+
+                // Try to find the contact ID to look up the phone number
+                val idIdx = cursor.getColumnIndex(ContactsContract.Contacts._ID)
+                val contactId = if (idIdx >= 0) cursor.getString(idIdx) else null
+
+                if (contactId != null) {
+                    // Query the Phone table for this contact's numbers
                     cr.query(
                         ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                         null,
                         ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                        arrayOf(id),
+                        arrayOf(contactId),
                         null
                     )?.use { pCursor ->
+                        // Loop through numbers to find the primary one or just take the first one
                         if (pCursor.moveToFirst()) {
                             val numIdx = pCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                            if (numIdx >= 0) phone = pCursor.getString(numIdx)
+                            if (numIdx >= 0) {
+                                phone = pCursor.getString(numIdx)
+                            }
                         }
                     }
                 }
+
+                // If name or phone is still null, it might be because the URI points directly to a data row (like a specific phone record)
+                if (name == null) {
+                    val displayNameIdx = cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)
+                    if (displayNameIdx >= 0) name = cursor.getString(displayNameIdx)
+                }
+                if (phone == null) {
+                    val dataPhoneIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                    if (dataPhoneIdx >= 0) phone = cursor.getString(dataPhoneIdx)
+                }
             }
         }
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
-    return name?.let { it to formatPhoneNumber(phone) }
+
+    return if (name != null) {
+        name!! to formatPhoneNumber(phone)
+    } else {
+        null
+    }
 }
 
 fun formatEpochToDate(epoch: Long): String {
