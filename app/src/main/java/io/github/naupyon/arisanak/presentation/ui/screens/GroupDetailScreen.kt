@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -196,7 +197,7 @@ fun GroupDetailScreen(
                             val matchesFilter = when(selectedFilter) {
                                 "Belum Bayar" -> it.state == PaymentState.UNPAID || it.state == PaymentState.PARTIAL
                                 "Lunas" -> it.state == PaymentState.PAID
-                                "Ditalangi" -> it.state == PaymentState.DITALANGI
+                                "Ditalangi" -> it.state.name.startsWith("DITALANGI")
                                 else -> true
                             }
                             matchesSearch && matchesFilter
@@ -232,8 +233,12 @@ fun GroupDetailScreen(
                                     shape = RoundedCornerShape(20.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                        Column {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
                                             Text(text = "Putaran #${interval.sequenceNumber}", fontWeight = FontWeight.Bold)
                                             Text(text = "Pemenang: ${winner?.member?.displayName ?: "Unknown"}")
                                         }
@@ -354,7 +359,10 @@ fun GroupDetailScreen(
                         Text(text = "Selamat! 🎉", style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
                         Text(text = winningMemberState!!.displayName, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold), textAlign = TextAlign.Center)
                         Text(text = "Telah memenangkan Arisan kelompok ${groupState?.group?.name}", textAlign = TextAlign.Center)
-                        Button(onClick = { showCelebrationDialog = false }, shape = CircleShape) {
+                        Button(onClick = { 
+                            showCelebrationDialog = false
+                            viewModel.advanceInterval(groupId)
+                        }, shape = CircleShape) {
                             Text("Mantap")
                         }
                     }
@@ -372,19 +380,37 @@ fun RosterRowItem(item: MemberPaymentState, onClick: () -> Unit, onSendReminder:
         modifier = Modifier.fillMaxWidth().clickable { onClick() }
     ) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = item.member.displayName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                val statusText = when(item.state) {
-                    PaymentState.PAID -> "Lunas"
-                    PaymentState.PARTIAL -> "Sisa Rp ${String.format(locale, "%,.0f", item.sisa)}"
-                    PaymentState.DITALANGI -> "Ditalangi"
-                    PaymentState.UNPAID -> "Belum Bayar"
+            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                val (icon, bgColor, tint) = when (item.state) {
+                    PaymentState.PAID -> Triple(Icons.Default.CheckCircle, Color(0xFFE8F5E9), Color(0xFF2E7D32))
+                    PaymentState.PARTIAL -> Triple(Icons.Default.History, Color(0xFFFFF3E0), Color(0xFFEF6C00))
+                    PaymentState.DITALANGI_PAID -> Triple(Icons.Default.CheckCircle, Color(0xFFE8F5E9), Color(0xFF2E7D32))
+                    PaymentState.DITALANGI_PARTIAL, PaymentState.DITALANGI_UNPAID -> Triple(Icons.Default.Warning, Color(0xFFFFEBEE), Color(0xFFC62828))
+                    PaymentState.UNPAID -> Triple(Icons.Default.Pending, Color(0xFFF5F5F5), Color(0xFF757575))
                 }
-                Text(text = statusText, color = if (item.state == PaymentState.PAID) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(bgColor), contentAlignment = Alignment.Center) {
+                    Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = tint)
+                }
+                Column {
+                    Text(text = item.member.displayName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                    val statusText = when {
+                        item.state == PaymentState.PAID -> "Lunas"
+                        item.state == PaymentState.PARTIAL -> "Sisa Rp ${String.format(locale, "%,.0f", item.sisa)}"
+                        item.state == PaymentState.DITALANGI_PAID -> "Lunas (Ditalangi)"
+                        item.state.name.startsWith("DITALANGI") -> "Ditalangi (Rp ${String.format(locale, "%,.0f", item.sisa)})"
+                        else -> "Belum Bayar"
+                    }
+                    Text(
+                        text = statusText,
+                        color = tint,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
-            if (item.state != PaymentState.PAID) {
+            if (item.state != PaymentState.PAID && item.state != PaymentState.DITALANGI_PAID) {
                 IconButton(onClick = onSendReminder, modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape).size(36.dp)) {
-                    Icon(imageVector = Icons.Default.Chat, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(16.dp))
+                    Icon(imageVector = Icons.AutoMirrored.Filled.Chat, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(16.dp))
                 }
             }
         }

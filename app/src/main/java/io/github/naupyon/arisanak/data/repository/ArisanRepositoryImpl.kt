@@ -95,6 +95,9 @@ class ArisanRepositoryImpl @Inject constructor(
     override fun getActivePiutangLogs(): Flow<List<PiutangLog>> = 
         dao.getActivePiutangLogs().map { list -> list.map { it.toDomain() } }
 
+    override fun getAllPiutangLogs(): Flow<List<PiutangLog>> = 
+        dao.getAllPiutangLogs().map { list -> list.map { it.toDomain() } }
+
     override suspend fun getActivePiutangLogsForMember(memberId: Long): List<PiutangLog> = 
         dao.getActivePiutangLogsForMember(memberId).map { it.toDomain() }
 

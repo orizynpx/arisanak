@@ -46,8 +46,9 @@ class ArisanViewModel @Inject constructor(
     val groupsUiState: StateFlow<List<GroupUiState>> = combine(
         repository.getAllGroups(),
         repository.getAllMembers(),
-        repository.getAllPaymentLogs()
-    ) { groups, allMembers, allLogs ->
+        repository.getAllPaymentLogs(),
+        repository.getAllPiutangLogs()
+    ) { groups, allMembers, allLogs, allPiutang ->
         groups.map { group ->
             val members = allMembers.filter { it.groupId == group.id }
             val intervals = repository.getIntervalsForGroup(group.id).firstOrNull() ?: emptyList()
@@ -64,7 +65,18 @@ class ArisanViewModel @Inject constructor(
                     val totalPaid = memberLogs.sumOf { it.amountPaid }
 
                     val state = when {
-                        isDitalangi -> PaymentState.DITALANGI
+                        isDitalangi -> {
+                            val ditalangiLog = memberLogs.find { it.isDitalangi }
+                            val piutang = ditalangiLog?.let { dLog ->
+                                allPiutang.filter { it.memberId == member.id }
+                                    .minByOrNull { Math.abs(it.timestamp - dLog.timestamp) }
+                            }
+                            when {
+                                piutang?.isSettled == true -> PaymentState.DITALANGI_PAID
+                                (piutang?.amountRepaid ?: 0.0) > 0 -> PaymentState.DITALANGI_PARTIAL
+                                else -> PaymentState.DITALANGI_UNPAID
+                            }
+                        }
                         totalPaid >= requiredDue -> PaymentState.PAID
                         totalPaid > 0 -> PaymentState.PARTIAL
                         else -> PaymentState.UNPAID
@@ -80,7 +92,7 @@ class ArisanViewModel @Inject constructor(
 
                 val targetPot = memberStates.sumOf { it.requiredDue }
                 val collectedAmount = logs.sumOf { it.amountPaid }
-                val allCompleted = memberStates.all { it.state == PaymentState.PAID || it.state == PaymentState.DITALANGI }
+                val allCompleted = memberStates.all { it.state == PaymentState.PAID || it.state.name.startsWith("DITALANGI") }
 
                 GroupUiState(
                     group = group,
@@ -119,16 +131,39 @@ class ArisanViewModel @Inject constructor(
         repository.getAllPaymentLogs(),
         repository.getAllMembers(),
         repository.getAllGroups(),
-        repository.getAllIntervals()
-    ) { logs, members, groups, intervals ->
+        repository.getAllIntervals(),
+        repository.getAllPiutangLogs()
+    ) { logs, members, groups, intervals, piutangs ->
         val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.forLanguageTag("id-ID"))
-        logs.mapNotNull { log ->
+        
+        val loggedHistory = logs.mapNotNull { log ->
             val member = members.find { it.id == log.memberId }
-            val interval = intervals.find { it.id == log.intervalId }
             val group = intervals.find { it.id == log.intervalId }?.let { inv ->
                 groups.find { it.id == inv.groupId }
             }
             if (member != null && group != null) {
+                val memberLogsAtThatTime = logs.filter { 
+                    it.memberId == log.memberId && 
+                    it.intervalId == log.intervalId && 
+                    it.timestamp <= log.timestamp 
+                }
+                val totalPaidAtThatTime = memberLogsAtThatTime.sumOf { it.amountPaid }
+                val requiredDue = member.customDueAmount ?: group.baseDueAmount
+                
+                val status = when {
+                    log.isDitalangi -> {
+                        val piutang = piutangs.filter { it.memberId == log.memberId }
+                            .minByOrNull { Math.abs(it.timestamp - log.timestamp) }
+                        when {
+                            piutang?.isSettled == true -> PaymentState.DITALANGI_PAID
+                            (piutang?.amountRepaid ?: 0.0) > 0 -> PaymentState.DITALANGI_PARTIAL
+                            else -> PaymentState.DITALANGI_UNPAID
+                        }
+                    }
+                    totalPaidAtThatTime >= requiredDue -> PaymentState.PAID
+                    else -> PaymentState.PARTIAL
+                }
+
                 TransactionHistoryItem(
                     id = log.id,
                     memberName = member.displayName,
@@ -137,10 +172,33 @@ class ArisanViewModel @Inject constructor(
                     isDitalangi = log.isDitalangi,
                     timestamp = log.timestamp,
                     formattedDate = sdf.format(Date(log.timestamp)),
+                    status = status,
                     receiptImagePath = log.receiptImagePath
                 )
             } else null
         }
+
+        val unpaidHistory = members.mapNotNull { member ->
+            val group = groups.find { it.id == member.groupId } ?: return@mapNotNull null
+            val activeInterval = intervals.filter { it.groupId == group.id }.find { !it.isCompleted } ?: return@mapNotNull null
+            val memberLogs = logs.filter { it.memberId == member.id && it.intervalId == activeInterval.id }
+            
+            if (memberLogs.isEmpty()) {
+                TransactionHistoryItem(
+                    id = -member.id,
+                    memberName = member.displayName,
+                    groupName = group.name,
+                    amount = 0.0,
+                    isDitalangi = false,
+                    timestamp = 0L,
+                    formattedDate = "Belum Bayar",
+                    status = PaymentState.UNPAID,
+                    receiptImagePath = null
+                )
+            } else null
+        }
+
+        (loggedHistory + unpaidHistory).sortedByDescending { it.timestamp }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun createGroup(name: String, frequency: ArisanFrequency, baseDue: Double, members: List<Pair<String, String?>>) {

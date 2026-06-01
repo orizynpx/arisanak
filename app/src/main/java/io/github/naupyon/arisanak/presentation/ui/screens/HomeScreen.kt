@@ -17,7 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
@@ -25,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.naupyon.arisanak.presentation.viewmodel.ArisanViewModel
+import io.github.naupyon.arisanak.presentation.viewmodel.*
 import io.github.naupyon.arisanak.presentation.ui.theme.*
 import io.github.naupyon.arisanak.presentation.ui.components.QuickLogPaymentDialog
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,6 +41,19 @@ fun HomeScreen(
     val totalPiutang by viewModel.totalPiutangBalance.collectAsState()
     val transactionHistory by viewModel.transactionHistory.collectAsState()
     val locale = LocalConfiguration.current.locales[0]
+
+    var selectedFilter by remember { mutableStateOf<String?>(null) }
+    val filteredHistory = remember(transactionHistory, selectedFilter) {
+        when (selectedFilter) {
+            null -> transactionHistory
+            "Lunas" -> transactionHistory.filter { it.status == PaymentState.PAID || it.status == PaymentState.DITALANGI_PAID }
+            "Belum Bayar" -> transactionHistory.filter { it.status == PaymentState.UNPAID }
+            "Angsuran" -> transactionHistory.filter { it.status == PaymentState.PARTIAL }
+            "Ditalangi" -> transactionHistory.filter { it.status.name.startsWith("DITALANGI") }
+            "Hutang Talangan" -> transactionHistory.filter { it.status == PaymentState.DITALANGI_UNPAID || it.status == PaymentState.DITALANGI_PARTIAL }
+            else -> transactionHistory
+        }
+    }
 
     var showQuickLogSheet by remember { mutableStateOf(false) }
 
@@ -200,19 +212,32 @@ fun HomeScreen(
                                                 modifier = Modifier
                                                     .padding(start = 8.dp)
                                                     .clip(CircleShape)
-                                                    .background(/*if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primary else */MaterialTheme.colorScheme.secondary)
+                                                    .background(MaterialTheme.colorScheme.secondary)
                                                     .padding(horizontal = 10.dp, vertical = 4.dp)
                                             ) {
                                                 Text(
                                                     text = if (groupState.isReadyToKocok) "Siap Kocok" else "Berjalan",
                                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                                     maxLines = 1,
-                                                    color = /*if (groupState.isReadyToKocok) MaterialTheme.colorScheme.onPrimary else */MaterialTheme.colorScheme.onSecondary
+                                                    color = MaterialTheme.colorScheme.onSecondary
                                                 )
                                             }
                                         }
                                         val progress = if (groupState.targetPot > 0) (groupState.collectedAmount / groupState.targetPot).toFloat() else 0f
-                                        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape))
+                                        LinearProgressIndicator(
+                                            progress = { progress },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(8.dp)
+                                                .clip(CircleShape)
+                                                .border(
+                                                    width = 1.dp,
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                                    shape = CircleShape
+                                                ),
+                                            trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
 
                                         Row(
                                             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -240,7 +265,30 @@ fun HomeScreen(
                 )
             }
 
-            if (transactionHistory.isEmpty()) {
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 8.dp)
+                ) {
+                    val filters = listOf(
+                        null to "Semua",
+                        "Lunas" to "Lunas",
+                        "Belum Bayar" to "Belum Bayar",
+                        "Angsuran" to "Angsuran/Hutang",
+                        "Ditalangi" to "Semua Talangan",
+                        "Hutang Talangan" to "Hutang Talangan"
+                    )
+                    items(filters) { (id, label) ->
+                        FilterChip(
+                            selected = selectedFilter == id,
+                            onClick = { selectedFilter = id },
+                            label = { Text(label) }
+                        )
+                    }
+                }
+            }
+
+            if (filteredHistory.isEmpty()) {
                 item {
                     Card(
                         shape = RoundedCornerShape(24.dp),
@@ -254,13 +302,13 @@ fun HomeScreen(
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Icon(imageVector = Icons.AutoMirrored.Outlined.ReceiptLong, contentDescription = null, modifier = Modifier.size(48.dp))
-                                Text("Belum ada transaksi pembayaran.", style = MaterialTheme.typography.bodyMedium)
+                                Text("Tidak ada data untuk filter ini.", style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }
                 }
             } else {
-                items(transactionHistory) { item ->
+                items(filteredHistory) { item ->
                     Card(
                         shape = RoundedCornerShape(24.dp),
                         modifier = Modifier.fillMaxWidth(),
@@ -283,8 +331,14 @@ fun HomeScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (item.isDitalangi) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = if (item.isDitalangi) Icons.Default.Warning else Icons.Default.Check, contentDescription = null, modifier = Modifier.size(20.dp))
+                                val (icon, bgColor, tint) = when (item.status) {
+                                    PaymentState.PAID, PaymentState.DITALANGI_PAID -> Triple(Icons.Default.CheckCircle, Color(0xFFE8F5E9), Color(0xFF2E7D32))
+                                    PaymentState.DITALANGI_UNPAID -> Triple(Icons.Default.Warning, Color(0xFFFFEBEE), Color(0xFFC62828))
+                                    PaymentState.PARTIAL, PaymentState.DITALANGI_PARTIAL -> Triple(Icons.Default.History, Color(0xFFFFF3E0), Color(0xFFEF6C00))
+                                    PaymentState.UNPAID -> Triple(Icons.Default.Pending, Color(0xFFF5F5F5), Color(0xFF757575))
+                                }
+                                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(bgColor), contentAlignment = Alignment.Center) {
+                                    Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = tint)
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = item.memberName, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -293,10 +347,26 @@ fun HomeScreen(
                                 }
                             }
                             Column(horizontalAlignment = Alignment.End) {
-                                Text(text = String.format(locale, "Rp %,.0f", item.amount), fontWeight = FontWeight.Bold, color = if (item.isDitalangi) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
-                                if (item.isDitalangi) {
-                                    Box(modifier = Modifier.clip(CircleShape).background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 6.dp, vertical = 2.dp)) {
-                                        Text("DITALANGI", fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = if (item.status == PaymentState.UNPAID) "Rp 0" else String.format(locale, "Rp %,.0f", item.amount),
+                                    fontWeight = FontWeight.Bold,
+                                    color = when(item.status) {
+                                        PaymentState.DITALANGI_UNPAID -> MaterialTheme.colorScheme.error
+                                        PaymentState.PAID, PaymentState.DITALANGI_PAID -> MaterialTheme.colorScheme.primary
+                                        PaymentState.PARTIAL, PaymentState.DITALANGI_PARTIAL -> MaterialTheme.colorScheme.secondary
+                                        else -> MaterialTheme.colorScheme.outline
+                                    }
+                                )
+                                if (item.status.name.startsWith("DITALANGI")) {
+                                    val talanganLabel = when(item.status) {
+                                        PaymentState.DITALANGI_PAID -> "TALANGAN LUNAS"
+                                        PaymentState.DITALANGI_PARTIAL -> "TALANGAN CICIL"
+                                        else -> "DITALANGI"
+                                    }
+                                    Box(modifier = Modifier.clip(CircleShape).background(
+                                        if (item.status == PaymentState.DITALANGI_PAID) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer
+                                    ).padding(horizontal = 6.dp, vertical = 2.dp)) {
+                                        Text(talanganLabel, fontSize = 8.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }

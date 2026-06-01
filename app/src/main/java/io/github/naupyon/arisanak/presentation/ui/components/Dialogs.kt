@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -55,7 +56,11 @@ fun CreateGroupDialog(
         contract = ActivityResultContracts.PickContact()
     ) { uri ->
         if (uri != null) {
-            parseContactResult(context, uri)?.let { membersList.add(it) }
+            try {
+                parseContactResult(context, uri)?.let { membersList.add(it) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -84,15 +89,25 @@ fun CreateGroupDialog(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     HorizontalDivider()
                     Text(text = "Langkah 2: Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         ArisanFrequency.entries.forEach { freq ->
                             val isSel = freq == selectedFreq
-                            Box(
-                                modifier = Modifier.weight(1f).clip(CircleShape).background(if (isSel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant).clickable { selectedFreq = freq }.padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = freq.name, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
+                            FilterChip(
+                                selected = isSel,
+                                onClick = { selectedFreq = freq },
+                                label = {
+                                    Text(
+                                        text = freq.label,
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                    )
+                                },
+                                shape = CircleShape
+                            )
                         }
                     }
                 }
@@ -126,14 +141,19 @@ fun CreateGroupDialog(
                             value = freshMemberPhone, onValueChange = { freshMemberPhone = it }, placeholder = { Text("WA") }, 
                             modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp), singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                            supportingText = {
+                                formatPhoneNumber(freshMemberPhone)?.let {
+                                    Text("Format WA: $it", style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
                         )
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = { contactPickerLauncher.launch(null) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
                             Icon(Icons.Default.Contacts, null, modifier = Modifier.size(16.dp)); Text("Kontak", fontSize = 11.sp)
                         }
-                        Button(onClick = { if (freshMemberName.isNotBlank()) { membersList.add(freshMemberName to freshMemberPhone.takeIf { it.isNotBlank() }); freshMemberName = ""; freshMemberPhone = "" } }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
+                        Button(onClick = { if (freshMemberName.isNotBlank()) { membersList.add(freshMemberName to formatPhoneNumber(freshMemberPhone)); freshMemberName = ""; freshMemberPhone = "" } }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
                             Text("Tambah +", fontSize = 11.sp)
                         }
                     }
@@ -195,7 +215,7 @@ fun QuickLogPaymentDialog(
             }
 
             AnimatedVisibility(visible = stepOneGroupId != null) {
-                val members = groups.find { it.group.id == stepOneGroupId }?.members?.filter { it.state != PaymentState.PAID && it.state != PaymentState.DITALANGI } ?: emptyList()
+                val members = groups.find { it.group.id == stepOneGroupId }?.members?.filter { it.state != PaymentState.PAID && !it.state.name.startsWith("DITALANGI") } ?: emptyList()
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     HorizontalDivider()
                     Text("Langkah 2: Pilih Nama Anggota", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
@@ -340,7 +360,12 @@ fun AddMemberMidCycleDialog(
                         keyboardActions = KeyboardActions(onDone = { 
                             focusManager.clearFocus()
                             keyboardController?.hide()
-                        })
+                        }),
+                        supportingText = {
+                            formatPhoneNumber(phone)?.let {
+                                Text("Format WA: $it", style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
                     )
                 }
             }
@@ -362,7 +387,7 @@ fun AddMemberMidCycleDialog(
 
             AnimatedVisibility(visible = name.trim().length >= 2) {
                 Button(
-                    onClick = { if (name.isNotBlank()) { onAdd(name, phone.takeIf { it.isNotBlank() }, isCatchUp); onDismiss() } },
+                    onClick = { if (name.isNotBlank()) { onAdd(name, formatPhoneNumber(phone), isCatchUp); onDismiss() } },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = CircleShape
                 ) { Text("Simpan", fontWeight = FontWeight.Bold) }

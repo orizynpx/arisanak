@@ -1,6 +1,7 @@
 package io.github.naupyon.arisanak.presentation.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -59,8 +60,14 @@ fun GroupCardItem(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Putaran #${groupState.group.currentIntervalSequence} • Frekuensi: ${groupState.group.frequency}",
+                        text = "Putaran #${groupState.group.currentIntervalSequence}",
                         style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "Frekuensi: ${groupState.group.frequency.label}",
+                        style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -101,8 +108,14 @@ fun GroupCardItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
-                        .clip(CircleShape),
-//                    color = ProgressIndicatorDefaults.linearColor
+                        .clip(CircleShape)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            shape = CircleShape
+                        ),
+                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 

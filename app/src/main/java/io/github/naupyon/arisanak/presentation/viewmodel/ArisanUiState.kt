@@ -3,7 +3,7 @@ package io.github.naupyon.arisanak.presentation.viewmodel
 import io.github.naupyon.arisanak.domain.model.*
 
 enum class PaymentState {
-    UNPAID, PARTIAL, PAID, DITALANGI
+    UNPAID, PARTIAL, PAID, DITALANGI_UNPAID, DITALANGI_PARTIAL, DITALANGI_PAID
 }
 
 data class MemberPaymentState(
@@ -40,5 +40,6 @@ data class TransactionHistoryItem(
     val isDitalangi: Boolean,
     val timestamp: Long,
     val formattedDate: String,
+    val status: PaymentState,
     val receiptImagePath: String? = null
 )

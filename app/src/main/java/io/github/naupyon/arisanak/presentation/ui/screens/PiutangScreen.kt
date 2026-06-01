@@ -1,5 +1,6 @@
 package io.github.naupyon.arisanak.presentation.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,10 +9,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -106,13 +110,34 @@ fun PiutangRowItem(debtor: PiutangDebtorState, onPay: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = debtor.member.displayName, fontWeight = FontWeight.Bold)
-                Text(text = "Asal Kelompok: ${debtor.groupName}", fontSize = 12.sp)
-                Text(text = "Hutang: Rp ${String.format(LocalLocale.current.platformLocale, "%,.0f", debtor.totalDebt - debtor.totalRepaid)}", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFFEBEE)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = Color(0xFFC62828)
+                    )
+                }
+                Column {
+                    Text(text = debtor.member.displayName, fontWeight = FontWeight.Bold)
+                    Text(text = "Asal Kelompok: ${debtor.groupName}", fontSize = 12.sp)
+                    Text(
+                        text = "Hutang: Rp ${String.format(LocalLocale.current.platformLocale, "%,.0f", debtor.totalDebt - debtor.totalRepaid)}",
+                        color = Color(0xFFC62828),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
             Button(onClick = onPay, shape = CircleShape) {
-                Text("Bayar")
+                Text("Bayar", fontSize = 12.sp)
             }
         }
     }

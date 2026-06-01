@@ -43,6 +43,19 @@ fun launchWhatsApp(context: Context, phone: String?, text: String) {
     }
 }
 
+fun formatPhoneNumber(phone: String?): String? {
+    if (phone.isNullOrBlank()) return null
+    val digitsOnly = phone.replace("[^0-9]".toRegex(), "")
+    if (digitsOnly.isEmpty()) return null
+
+    return when {
+        digitsOnly.startsWith("0") -> "+62 ${digitsOnly.substring(1)}"
+        digitsOnly.startsWith("62") -> "+62 ${digitsOnly.substring(2)}"
+        digitsOnly.startsWith("8") -> "+62 $digitsOnly"
+        else -> "+$digitsOnly" // Fallback for other potential formats
+    }
+}
+
 fun parseContactResult(context: Context, contactUri: Uri): Pair<String, String?>? {
     var name: String? = null
     var phone: String? = null
@@ -74,7 +87,7 @@ fun parseContactResult(context: Context, contactUri: Uri): Pair<String, String?>
             }
         }
     }
-    return name?.let { it to phone }
+    return name?.let { it to formatPhoneNumber(phone) }
 }
 
 fun formatEpochToDate(epoch: Long): String {
