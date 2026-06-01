@@ -142,7 +142,7 @@ fun GroupDetailScreen(
                     )
                     GroupActionButton(
                         icon = Icons.Default.Group,
-                        label = "Manage Members",
+                        label = "Kelola Anggota",
                         onClick = { onNavigateToMembers(groupId) },
                         modifier = Modifier.weight(1f)
                     )
