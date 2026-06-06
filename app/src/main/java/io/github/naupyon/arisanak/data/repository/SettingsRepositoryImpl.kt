@@ -26,7 +26,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val WIN_TEMPLATE = stringPreferencesKey("win_template")
     }
 
-    override fun getUserName(): Flow<String> = context.dataStore.data.map { it[PreferencesKeys.USER_NAME] ?: "Ibu Nurul" }
+    override fun getUserName(): Flow<String> = context.dataStore.data.map { it[PreferencesKeys.USER_NAME] ?: "Ibu Aminah" }
     override suspend fun setUserName(name: String) { context.dataStore.edit { it[PreferencesKeys.USER_NAME] = name } }
 
     override fun getLanguage(): Flow<String> = context.dataStore.data.map { it[PreferencesKeys.LANGUAGE] ?: "ID" }
