@@ -101,7 +101,7 @@ fun MainNavigationShell(viewModel: ArisanViewModel) {
                                 modifier = Modifier.size(24.dp)
                             )
                         },
-                        label = { Text("Grup") }
+                        label = { Text("Kelompok") }
                     )
 
                     NavigationBarItem(

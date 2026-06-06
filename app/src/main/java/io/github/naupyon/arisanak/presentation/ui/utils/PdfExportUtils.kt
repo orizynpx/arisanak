@@ -69,7 +69,7 @@ object PdfExportUtils {
         // Summary Section
         canvas.drawText("Ringkasan Kas", margin, yPos, headerPaint)
         yPos += 20f
-        canvas.drawText("Total Pot: ${CurrencyUtil.formatCurrency(groupState.targetPot)}", margin, yPos, textPaint)
+        canvas.drawText("Total Tarikan: ${CurrencyUtil.formatCurrency(groupState.targetPot)}", margin, yPos, textPaint)
         yPos += 15f
         canvas.drawText("Terkumpul: ${CurrencyUtil.formatCurrency(groupState.collectedAmount)}", margin, yPos, textPaint)
         yPos += 15f

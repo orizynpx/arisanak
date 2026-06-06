@@ -279,16 +279,18 @@ class ArisanViewModel @Inject constructor(
             // Check if group was "finished" (no active interval)
             val activeInterval = repository.getActiveIntervalForGroupOneShot(groupId)
             if (activeInterval == null) {
-                // Reactivate group: unarchive and prepare for a new interval if it was finished
+                // Reactivate group: unarchive and increment cycle to reflect the new member
+                val nextSeq = group.currentIntervalSequence + 1
                 repository.updateGroup(group.copy(
                     eligibleKasWinnerIds = eligibleJson,
-                    isArchived = false
+                    isArchived = false,
+                    currentIntervalSequence = nextSeq
                 ))
                 
                 // Create a new interval for the group to resume activity
                 repository.insertInterval(Interval(
                     groupId = groupId,
-                    sequenceNumber = group.currentIntervalSequence,
+                    sequenceNumber = nextSeq,
                     isCompleted = false
                 ))
             } else {

@@ -35,8 +35,8 @@ fun GroupCardItem(
             .then(if (isClickable) Modifier.clickable { onCardClick() } else Modifier)
             .testTag("group_card_${groupState.group.id}"),
         colors = CardDefaults.cardColors(
-            containerColor = if (groupState.group.isArchived) Color(0xFFE0E0E0) else MaterialTheme.colorScheme.surfaceContainer,
-            contentColor = if (groupState.group.isArchived) Color.Gray else MaterialTheme.colorScheme.onSurface
+            containerColor = if (groupState.group.isArchived) Color(0xFFE0E0E0) else MaterialTheme.colorScheme.primaryContainer,
+            contentColor = if (groupState.group.isArchived) Color.Gray else MaterialTheme.colorScheme.onPrimaryContainer
         )
     ) {
         Column(
@@ -78,7 +78,7 @@ fun GroupCardItem(
                         .clip(CircleShape)
                         .background(
                             if (groupState.group.isArchived) Color.Gray 
-                            else if (groupState.isReadyToKocok) MaterialTheme.colorScheme.primary 
+                            else if (groupState.isReadyToKocok) MaterialTheme.colorScheme.tertiary
                             else MaterialTheme.colorScheme.secondary
                         )
                         .padding(horizontal = 14.dp, vertical = 6.dp)
@@ -86,7 +86,7 @@ fun GroupCardItem(
                     Text(
                         text = if (groupState.group.isArchived) "Selesai" else if (groupState.isReadyToKocok) "Siap Kocok" else "Berjalan",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = if (groupState.group.isArchived) Color.White else if (groupState.isReadyToKocok) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
+                        color = if (groupState.group.isArchived) Color.White else if (groupState.isReadyToKocok) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSecondary
                     )
                 }
             }

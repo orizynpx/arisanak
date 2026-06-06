@@ -52,7 +52,13 @@ fun ProfilSettingsScreen(
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("Warna Tema")
-                    TextButton(onClick = { viewModel.updateColorMode(if (settings?.colorMode == "Default") "Material You" else "Default") }) {
+                    TextButton(
+                        onClick = { viewModel.updateColorMode(if (settings?.colorMode == "Default") "Material You" else "Default") },
+                        colors = ButtonDefaults.textButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        ) {
                         Text(settings?.colorMode ?: "Default")
                     }
                 }

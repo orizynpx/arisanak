@@ -210,7 +210,7 @@ fun HomeScreen(
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Icon(imageVector = Icons.Outlined.Groups, contentDescription = null, modifier = Modifier.size(48.dp))
-                                    Text("Belum ada kelompok aktif. Tambahkan di tab Groups!", textAlign = TextAlign.Center)
+                                    Text("Belum ada kelompok aktif. Tambahkan di tab Kelompok!", textAlign = TextAlign.Center)
                                 }
                             }
                         }
@@ -267,7 +267,13 @@ fun HomeScreen(
                 item {
                     Card(
                         shape = RoundedCornerShape(24.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+//                            disabledContainerColor = Color.LightGray,
+//                            disabledContentColor = Color.DarkGray
+                        )
                     ) {
                         Box(
                             modifier = Modifier
@@ -290,8 +296,8 @@ fun HomeScreen(
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             contentColor = MaterialTheme.colorScheme.onSurface,
-                            disabledContainerColor = Color.LightGray,
-                            disabledContentColor = Color.DarkGray
+//                            disabledContainerColor = Color.LightGray,
+//                            disabledContentColor = Color.DarkGray
                         )
                     ) {
                         Row(

@@ -77,7 +77,7 @@ fun GroupDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Info grup", fontWeight = FontWeight.Bold) },
+                title = { Text(text = "Info Kelompok", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Kembali")
@@ -92,7 +92,7 @@ fun GroupDetailScreen(
                         onDismissRequest = { menuExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Edit Grup") },
+                            text = { Text("Edit Kelompok") },
                             onClick = { 
                                 menuExpanded = false
                                 showEditGroupDialog = true 
@@ -100,7 +100,7 @@ fun GroupDetailScreen(
                             leadingIcon = { Icon(Icons.Default.Edit, null) }
                         )
                         DropdownMenuItem(
-                            text = { Text("Hapus Grup", color = MaterialTheme.colorScheme.error) },
+                            text = { Text("Hapus Kelompok", color = MaterialTheme.colorScheme.error) },
                             onClick = { 
                                 menuExpanded = false
                                 showDeleteConfirmDialog = true 
@@ -173,7 +173,7 @@ fun GroupDetailScreen(
                             val template = settings?.reminderTemplate ?: "Halo [NamaAnggota], tagihan Anda Rp [SisaTagihan]"
                             val msg = template
                                 .replace("[NamaAnggota]", item.member.displayName)
-                                .replace("[NamaGrup]", groupState.group.name)
+                                .replace("[NamaKelompok]", groupState.group.name)
                                 .replace("[SisaTagihan]", CurrencyUtil.formatCurrency(item.sisa))
                             
                             launchWhatsApp(context, item.member.phoneNumber, msg)
@@ -199,8 +199,8 @@ fun GroupDetailScreen(
         if (showDeleteConfirmDialog && groupState != null) {
             AlertDialog(
                 onDismissRequest = { showDeleteConfirmDialog = false },
-                title = { Text("Hapus Grup") },
-                text = { Text("Apakah Anda yakin ingin menghapus grup '${groupState.group.name}'? Seluruh data anggota dan riwayat akan hilang.") },
+                title = { Text("Hapus Kelompok") },
+                text = { Text("Apakah Anda yakin ingin menghapus kelompok '${groupState.group.name}'? Seluruh data anggota dan riwayat akan hilang.") },
                 confirmButton = {
                     TextButton(
                         onClick = {

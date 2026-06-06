@@ -193,11 +193,11 @@ fun WinnerDrawScreen(
                         Text(text = "Telah memenangkan Arisan kelompok ${groupState?.group?.name}", textAlign = TextAlign.Center)
                         
                         val potValue = groupState?.targetPot ?: 0.0
-                        val template = settings?.winTemplate ?: "Selamat kepada [NamaAnggota] telah memenangkan kocokan arisan kelompok [NamaGrup] dengan total pot Rp[NominalPot]! 🎉"
+                        val template = settings?.winTemplate ?: "Selamat kepada [NamaAnggota] telah memenangkan kocokan arisan kelompok [NamaKelompok] dengan total tarikan Rp[NominalTarikan]! 🎉"
                         val msg = template
                             .replace("[NamaAnggota]", winningMemberState!!.displayName)
-                            .replace("[NamaGrup]", groupState?.group?.name ?: "")
-                            .replace("[NominalPot]", CurrencyUtil.formatCurrency(potValue))
+                            .replace("[NamaKelompok]", groupState?.group?.name ?: "")
+                            .replace("[NominalTarikan]", CurrencyUtil.formatCurrency(potValue))
 
                         Button(
                             onClick = { shareText(context, msg) },

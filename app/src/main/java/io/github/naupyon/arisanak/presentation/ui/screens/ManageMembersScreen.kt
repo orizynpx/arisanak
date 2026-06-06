@@ -36,7 +36,7 @@ fun ManageMembersScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Manage Members", fontWeight = FontWeight.Bold) },
+                title = { Text("Kelola Anggota", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Kembali")
@@ -44,7 +44,7 @@ fun ManageMembersScreen(
                 },
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(imageVector = Icons.Default.PersonAdd, contentDescription = "Tambah Member")
+                        Icon(imageVector = Icons.Default.PersonAdd, contentDescription = "Tambah Anggota")
                     }
                 }
             )
@@ -98,12 +98,12 @@ fun ManageMembersScreen(
         if (memberToDelete != null) {
             AlertDialog(
                 onDismissRequest = { memberToDelete = null },
-                title = { Text("Hapus Member") },
+                title = { Text("Hapus Anggota") },
                 text = { 
                     val msg = if (memberToDelete!!.hasWon) {
-                        "Member ini sudah memenangkan arisan dan tidak dapat dihapus."
+                        "Anggota ini sudah memenangkan arisan dan tidak dapat dihapus."
                     } else {
-                        "Apakah Anda yakin ingin menghapus '${memberToDelete!!.displayName}'? Kontribusi yang sudah dibayarkan akan masuk ke saldo KAS grup."
+                        "Apakah Anda yakin ingin menghapus '${memberToDelete!!.displayName}'? Kontribusi yang sudah dibayarkan akan masuk ke saldo kas kelompok."
                     }
                     Text(msg)
                 },
