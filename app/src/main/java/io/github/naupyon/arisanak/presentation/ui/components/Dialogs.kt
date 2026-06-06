@@ -74,6 +74,7 @@ import io.github.naupyon.arisanak.domain.model.Group
 import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
 import io.github.naupyon.arisanak.presentation.viewmodel.MemberPaymentState
 import io.github.naupyon.arisanak.presentation.viewmodel.PaymentState
+import io.github.naupyon.arisanak.util.CurrencyUtil
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -166,7 +167,7 @@ fun CreateGroupDialog(
                     HorizontalDivider()
                     Text(text = "Langkah 3: Jumlah Iuran Dasar", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     OutlinedTextField(
-                        value = baseDueStr, onValueChange = { baseDueStr = it }, prefix = { Text("Rp ") }, 
+                        value = baseDueStr, onValueChange = { baseDueStr = it }, prefix = { Text("Rp") }, 
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next), 
                         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), singleLine = true
                     )
@@ -276,13 +277,13 @@ fun QuickLogPaymentDialog(
                     ExposedDropdownMenuBox(expanded = stepTwoExpanded, onExpandedChange = { stepTwoExpanded = it }) {
                         val selM = members.find { it.member.id == stepTwoMemberId }
                         OutlinedTextField(
-                            value = selM?.let { "${it.member.displayName} (Sisa: ${it.sisa})" } ?: "Pilih Anggota...",
+                            value = selM?.let { "${it.member.displayName} (Sisa: ${CurrencyUtil.formatCurrency(it.sisa)})" } ?: "Pilih Anggota...",
                             onValueChange = {}, readOnly = true,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = stepTwoExpanded) },
                             modifier = Modifier.menuAnchor().fillMaxWidth(), shape = RoundedCornerShape(16.dp)
                         )
                         ExposedDropdownMenu(expanded = stepTwoExpanded, onDismissRequest = { stepTwoExpanded = false }) {
-                            members.forEach { m -> DropdownMenuItem(text = { Text("${m.member.displayName} (Sisa: ${m.sisa})") }, onClick = { stepTwoMemberId = m.member.id; stepThreeAmountStr = m.sisa.toString(); stepTwoExpanded = false }) }
+                            members.forEach { m -> DropdownMenuItem(text = { Text("${m.member.displayName} (Sisa: ${CurrencyUtil.formatCurrency(m.sisa)})") }, onClick = { stepTwoMemberId = m.member.id; stepThreeAmountStr = m.sisa.toString(); stepTwoExpanded = false }) }
                         }
                     }
                 }
@@ -293,7 +294,7 @@ fun QuickLogPaymentDialog(
                     HorizontalDivider()
                     Text("Langkah 3: Jumlah Pembayaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                     OutlinedTextField(
-                        value = stepThreeAmountStr, onValueChange = { stepThreeAmountStr = it }, prefix = { Text("Rp ") }, 
+                        value = stepThreeAmountStr, onValueChange = { stepThreeAmountStr = it }, prefix = { Text("Rp") }, 
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done), 
                         keyboardActions = KeyboardActions(onDone = { 
                             focusManager.clearFocus()
@@ -381,7 +382,7 @@ fun EditGroupDialog(
                 HorizontalDivider()
                 Text(text = "Iuran Dasar", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                 OutlinedTextField(
-                    value = baseDueStr, onValueChange = { baseDueStr = it }, prefix = { Text("Rp ") },
+                    value = baseDueStr, onValueChange = { baseDueStr = it }, prefix = { Text("Rp") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                     modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), singleLine = true
                 )
@@ -431,12 +432,13 @@ fun MemberActionDialog(
             
             if (item.state == PaymentState.UNPAID || item.state == PaymentState.PARTIAL) {
                 Button(onClick = { onFullPay(); onDismiss() }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = CircleShape, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))) {
-                    Icon(Icons.Default.Check, null); Spacer(Modifier.width(8.dp)); Text("Lunas Instan (Rp ${item.sisa})")
+                    Icon(Icons.Default.Check, null); Spacer(Modifier.width(8.dp)); Text("Lunas Instan (${CurrencyUtil.formatCurrency(item.sisa)})")
                 }
 
                 HorizontalDivider()
                 OutlinedTextField(
                     value = customAmt, onValueChange = { customAmt = it }, label = { Text("Jumlah Angsuran (Rp)") }, 
+                    prefix = { Text("Rp") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done), 
                     keyboardActions = KeyboardActions(onDone = { 
                         focusManager.clearFocus()
@@ -574,9 +576,10 @@ fun PiutangRepaymentDialog(
         Card(shape = RoundedCornerShape(28.dp)) {
             Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(text = "Bayar Hutang: $memberName", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text(text = "Sisa Hutang Maksimal: Rp $maxRepay")
+                Text(text = "Sisa Hutang Maksimal: ${CurrencyUtil.formatCurrency(maxRepay)}")
                 OutlinedTextField(
                     value = amount, onValueChange = { amount = it }, label = { Text("Jumlah Pengembalian (Rp)") }, singleLine = true,
+                    prefix = { Text("Rp") },
                     modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
                 )

@@ -30,6 +30,7 @@ import io.github.naupyon.arisanak.presentation.ui.utils.PdfExportUtils
 import io.github.naupyon.arisanak.presentation.viewmodel.ArisanViewModel
 import io.github.naupyon.arisanak.presentation.viewmodel.PaymentState
 import io.github.naupyon.arisanak.presentation.viewmodel.TransactionHistoryItem
+import io.github.naupyon.arisanak.util.CurrencyUtil
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -229,7 +230,7 @@ fun HistoryLogItem(item: TransactionHistoryItem) {
                 }
             }
             Text(
-                text = if (item.status == PaymentState.UNPAID) "Rp 0" else "Rp ${String.format("%,.0f", item.amount)}",
+                text = if (item.status == PaymentState.UNPAID) "Rp0" else CurrencyUtil.formatCurrency(item.amount),
                 fontWeight = FontWeight.Bold,
                 color = when (item.status) {
                     PaymentState.PAID, PaymentState.DITALANGI_PAID -> MaterialTheme.colorScheme.primary

@@ -23,6 +23,7 @@ import io.github.naupyon.arisanak.presentation.viewmodel.ArisanViewModel
 import io.github.naupyon.arisanak.presentation.viewmodel.PiutangDebtorState
 import io.github.naupyon.arisanak.presentation.ui.theme.*
 import io.github.naupyon.arisanak.presentation.ui.components.PiutangRepaymentDialog
+import io.github.naupyon.arisanak.util.CurrencyUtil
 import java.util.Locale
 import androidx.compose.ui.platform.LocalLocale
 
@@ -62,7 +63,7 @@ fun PiutangScreen(
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(text = "Total Piutang Belum Tertagih")
                     Text(
-                        text = String.format(LocalLocale.current.platformLocale, "Rp %,.0f", totalPiutang),
+                        text = CurrencyUtil.formatCurrency(totalPiutang),
                         style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -133,7 +134,7 @@ fun PiutangRowItem(debtor: PiutangDebtorState, onPay: () -> Unit) {
                     Text(text = debtor.member.displayName, fontWeight = FontWeight.Bold)
                     Text(text = "Asal Kelompok: ${debtor.groupName}", fontSize = 12.sp)
                     Text(
-                        text = "Hutang: Rp ${String.format(LocalLocale.current.platformLocale, "%,.0f", debtor.totalDebt - debtor.totalRepaid)}",
+                        text = "Hutang: ${CurrencyUtil.formatCurrency(debtor.totalDebt - debtor.totalRepaid)}",
                         color = Color(0xFFC62828),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodySmall

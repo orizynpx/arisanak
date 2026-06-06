@@ -47,6 +47,7 @@ import io.github.naupyon.arisanak.domain.model.Member
 import io.github.naupyon.arisanak.presentation.ui.components.*
 import io.github.naupyon.arisanak.presentation.ui.theme.*
 import io.github.naupyon.arisanak.presentation.viewmodel.*
+import io.github.naupyon.arisanak.util.CurrencyUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -173,7 +174,7 @@ fun GroupDetailScreen(
                             val msg = template
                                 .replace("[NamaAnggota]", item.member.displayName)
                                 .replace("[NamaGrup]", groupState.group.name)
-                                .replace("[SisaTagihan]", String.format(Locale.getDefault(), "%,.0f", item.sisa))
+                                .replace("[SisaTagihan]", CurrencyUtil.formatCurrency(item.sisa))
                             
                             launchWhatsApp(context, item.member.phoneNumber, msg)
                         }
@@ -307,9 +308,9 @@ fun RosterRowItem(
                     Text(text = item.member.displayName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                     val statusText = when {
                         item.state == PaymentState.PAID -> "Lunas"
-                        item.state == PaymentState.PARTIAL -> "Sisa Rp ${String.format(locale, "%,.0f", item.sisa)}"
+                        item.state == PaymentState.PARTIAL -> "Sisa ${CurrencyUtil.formatCurrency(item.sisa)}"
                         item.state == PaymentState.DITALANGI_PAID -> "Lunas (Ditalangi)"
-                        item.state.name.startsWith("DITALANGI") -> "Ditalangi (Rp ${String.format(locale, "%,.0f", item.sisa)})"
+                        item.state.name.startsWith("DITALANGI") -> "Ditalangi (${CurrencyUtil.formatCurrency(item.sisa)})"
                         else -> "Belum Bayar"
                     }
                     Text(

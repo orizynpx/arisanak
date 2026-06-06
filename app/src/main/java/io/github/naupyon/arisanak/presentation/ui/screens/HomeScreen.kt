@@ -62,6 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.naupyon.arisanak.util.CurrencyUtil
 import io.github.naupyon.arisanak.presentation.ui.components.GroupCardItem
 import io.github.naupyon.arisanak.presentation.ui.components.QuickLogPaymentDialog
 import io.github.naupyon.arisanak.presentation.viewmodel.ArisanViewModel
@@ -177,7 +178,7 @@ fun HomeScreen(
                                 )
                             }
                             Text(
-                                  text = String.format(locale, "Rp%,.0f", totalPiutang),
+                                  text = CurrencyUtil.formatCurrency(totalPiutang),
                                   style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold)
                             )
                             Text(
@@ -322,7 +323,7 @@ fun HomeScreen(
                             }
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
-                                    text = if (item.status == PaymentState.UNPAID) "Rp 0" else String.format(locale, "Rp %,.0f", item.amount),
+                                    text = if (item.status == PaymentState.UNPAID) "Rp0" else CurrencyUtil.formatCurrency(item.amount),
                                     fontWeight = FontWeight.Bold,
                                     color = when(item.status) {
                                         PaymentState.DITALANGI_UNPAID -> MaterialTheme.colorScheme.error

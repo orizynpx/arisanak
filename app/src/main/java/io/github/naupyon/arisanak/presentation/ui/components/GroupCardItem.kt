@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
+import io.github.naupyon.arisanak.util.CurrencyUtil
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -97,11 +98,11 @@ fun GroupCardItem(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
-                        text = "Terkumpul: Rp${String.format("%,.0f", groupState.collectedAmount)}",
+                        text = "Terkumpul: ${CurrencyUtil.formatCurrency(groupState.collectedAmount)}",
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                     )
                     Text(
-                        text = "Target: Rp${String.format("%,.0f", groupState.targetPot)}",
+                        text = "Target: ${CurrencyUtil.formatCurrency(groupState.targetPot)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

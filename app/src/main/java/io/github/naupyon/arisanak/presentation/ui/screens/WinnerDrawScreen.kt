@@ -54,6 +54,7 @@ import io.github.naupyon.arisanak.presentation.ui.components.ConfettiCanvas
 import io.github.naupyon.arisanak.presentation.ui.components.launchWhatsApp
 import io.github.naupyon.arisanak.presentation.ui.components.shareText
 import io.github.naupyon.arisanak.presentation.viewmodel.ArisanViewModel
+import io.github.naupyon.arisanak.util.CurrencyUtil
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.random.Random
@@ -196,7 +197,7 @@ fun WinnerDrawScreen(
                         val msg = template
                             .replace("[NamaAnggota]", winningMemberState!!.displayName)
                             .replace("[NamaGrup]", groupState?.group?.name ?: "")
-                            .replace("[NominalPot]", String.format(LocalLocale.current.platformLocale, "%,.0f", potValue))
+                            .replace("[NominalPot]", CurrencyUtil.formatCurrency(potValue))
 
                         Button(
                             onClick = { shareText(context, msg) },

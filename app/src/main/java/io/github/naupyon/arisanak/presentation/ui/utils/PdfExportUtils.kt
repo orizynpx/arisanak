@@ -8,6 +8,7 @@ import android.graphics.pdf.PdfDocument
 import io.github.naupyon.arisanak.domain.model.Interval
 import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
 import io.github.naupyon.arisanak.presentation.viewmodel.PaymentState
+import io.github.naupyon.arisanak.util.CurrencyUtil
 import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -68,11 +69,11 @@ object PdfExportUtils {
         // Summary Section
         canvas.drawText("Ringkasan Kas", margin, yPos, headerPaint)
         yPos += 20f
-        canvas.drawText("Total Pot: Rp ${String.format(locale, "%,.0f", groupState.targetPot)}", margin, yPos, textPaint)
+        canvas.drawText("Total Pot: ${CurrencyUtil.formatCurrency(groupState.targetPot)}", margin, yPos, textPaint)
         yPos += 15f
-        canvas.drawText("Terkumpul: Rp ${String.format(locale, "%,.0f", groupState.collectedAmount)}", margin, yPos, textPaint)
+        canvas.drawText("Terkumpul: ${CurrencyUtil.formatCurrency(groupState.collectedAmount)}", margin, yPos, textPaint)
         yPos += 15f
-        canvas.drawText("Sisa: Rp ${String.format(locale, "%,.0f", groupState.targetPot - groupState.collectedAmount)}", margin, yPos, textPaint)
+        canvas.drawText("Sisa: ${CurrencyUtil.formatCurrency(groupState.targetPot - groupState.collectedAmount)}", margin, yPos, textPaint)
         yPos += 30f
 
         // Payment Status Table
@@ -103,8 +104,8 @@ object PdfExportUtils {
                 else -> "Belum Bayar"
             }
             canvas.drawText(statusStr, col2, yPos, tableRowPaint)
-            canvas.drawText(String.format(locale, "%,.0f", memberState.amountPaid), col3, yPos, tableRowPaint)
-            canvas.drawText(String.format(locale, "%,.0f", memberState.sisa), col4, yPos, tableRowPaint)
+            canvas.drawText(CurrencyUtil.formatCurrency(memberState.amountPaid).replace("Rp", ""), col3, yPos, tableRowPaint)
+            canvas.drawText(CurrencyUtil.formatCurrency(memberState.sisa).replace("Rp", ""), col4, yPos, tableRowPaint)
             yPos += 15f
         }
 
