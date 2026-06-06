@@ -6,11 +6,18 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,12 +25,40 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ContactPage
+import androidx.compose.material.icons.filled.Contacts
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Paid
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -36,7 +71,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import io.github.naupyon.arisanak.domain.model.ArisanFrequency
 import io.github.naupyon.arisanak.domain.model.Group
-import io.github.naupyon.arisanak.presentation.ui.theme.*
 import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
 import io.github.naupyon.arisanak.presentation.viewmodel.MemberPaymentState
 import io.github.naupyon.arisanak.presentation.viewmodel.PaymentState
@@ -309,36 +343,54 @@ fun EditGroupDialog(
         ) {
             Text(text = "Edit Kelompok", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
 
-            OutlinedTextField(
-                value = name, onValueChange = { name = it }, label = { Text("Nama Kelompok") }, 
-                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = "Nama Kelompok", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
+                OutlinedTextField(
+                    value = name, onValueChange = { name = it }, placeholder = { Text("cth: Arisan Keluarga") }, singleLine = true,
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+            }
 
-            Text(text = "Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                ArisanFrequency.entries.forEach { freq ->
-                    val isSel = freq == selectedFreq
-                    FilterChip(
-                        selected = isSel,
-                        onClick = { selectedFreq = freq },
-                        label = { Text(freq.label) },
-                        shape = CircleShape
-                    )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                HorizontalDivider()
+                Text(text = "Frekuensi Putaran", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ArisanFrequency.entries.forEach { freq ->
+                        val isSel = freq == selectedFreq
+                        FilterChip(
+                            selected = isSel,
+                            onClick = { selectedFreq = freq },
+                            label = {
+                                Text(
+                                    text = freq.label,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            },
+                            shape = CircleShape
+                        )
+                    }
                 }
             }
 
-            OutlinedTextField(
-                value = baseDueStr, onValueChange = { baseDueStr = it }, label = { Text("Iuran Dasar") }, prefix = { Text("Rp ") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                HorizontalDivider()
+                Text(text = "Iuran Dasar", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
+                OutlinedTextField(
+                    value = baseDueStr, onValueChange = { baseDueStr = it }, prefix = { Text("Rp ") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), singleLine = true
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
 
             Button(
-                onClick = { 
+                onClick = {
                     baseDueStr.toDoubleOrNull()?.let { amount ->
                         onUpdate(group.copy(name = name, frequency = selectedFreq, baseDueAmount = amount))
                     }
@@ -346,7 +398,9 @@ fun EditGroupDialog(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = CircleShape
             ) {
-                Text("Update", fontWeight = FontWeight.Bold)
+                Icon(Icons.Default.Save, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Simpan Perubahan", fontWeight = FontWeight.Bold)
             }
         }
     }
