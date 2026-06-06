@@ -102,8 +102,12 @@ fun PiutangScreen(
 @Composable
 fun PiutangRowItem(debtor: PiutangDebtorState, onPay: () -> Unit) {
     Card(
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

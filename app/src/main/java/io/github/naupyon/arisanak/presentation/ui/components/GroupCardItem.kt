@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.naupyon.arisanak.presentation.viewmodel.GroupUiState
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GroupCardItem(
     groupState: GroupUiState,
@@ -27,14 +28,14 @@ fun GroupCardItem(
     isClickable: Boolean = true
 ) {
     Card(
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .fillMaxWidth()
             .then(if (isClickable) Modifier.clickable { onCardClick() } else Modifier)
             .testTag("group_card_${groupState.group.id}"),
         colors = CardDefaults.cardColors(
-            containerColor = if (groupState.group.isArchived) Color.LightGray else MaterialTheme.colorScheme.primaryContainer,
-            contentColor = if (groupState.group.isArchived) Color.DarkGray else MaterialTheme.colorScheme.onPrimaryContainer
+            containerColor = if (groupState.group.isArchived) Color(0xFFE0E0E0) else MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = if (groupState.group.isArchived) Color.Gray else MaterialTheme.colorScheme.onSurface
         )
     ) {
         Column(
@@ -90,18 +91,19 @@ fun GroupCardItem(
             }
 
             val progress = if (groupState.targetPot > 0) (groupState.collectedAmount / groupState.targetPot).toFloat() else 0f
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Row(
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
                         text = "Terkumpul: Rp${String.format("%,.0f", groupState.collectedAmount)}",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                     )
                     Text(
                         text = "Target: Rp${String.format("%,.0f", groupState.targetPot)}",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -113,11 +115,11 @@ fun GroupCardItem(
                         .clip(CircleShape)
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            color = (if (groupState.group.isArchived) Color.Gray else MaterialTheme.colorScheme.primary).copy(alpha = 0.2f),
                             shape = CircleShape
                         ),
-                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
-                    color = MaterialTheme.colorScheme.primary
+                    trackColor = (if (groupState.group.isArchived) Color.Gray else MaterialTheme.colorScheme.onPrimaryContainer).copy(alpha = 0.1f),
+                    color = if (groupState.group.isArchived) Color.Gray else MaterialTheme.colorScheme.primary
                 )
             }
         }

@@ -138,10 +138,10 @@ fun MemberManageItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 Text(text = member.displayName, fontWeight = FontWeight.Bold)
-                member.phoneNumber?.let {
-                    Text(text = it, style = MaterialTheme.typography.bodySmall)
+                if (!member.phoneNumber.isNullOrBlank()) {
+                    Text(text = member.phoneNumber, style = MaterialTheme.typography.bodySmall)
                 }
                 if (member.hasWon) {
                     Text(

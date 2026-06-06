@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.naupyon.arisanak.domain.model.Interval
+import io.github.naupyon.arisanak.presentation.ui.components.launchWhatsApp
 import io.github.naupyon.arisanak.presentation.ui.utils.PdfExportUtils
 import io.github.naupyon.arisanak.presentation.viewmodel.ArisanViewModel
 import io.github.naupyon.arisanak.presentation.viewmodel.PaymentState
@@ -142,12 +144,33 @@ fun RiwayatArisanScreen(
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.EmojiEvents, null, tint = MaterialTheme.colorScheme.onTertiaryContainer)
-                                        Spacer(Modifier.width(12.dp))
-                                        Column {
-                                            Text("Pemenang Putaran", style = MaterialTheme.typography.labelSmall)
-                                            Text(winner?.member?.displayName ?: "Unknown", fontWeight = FontWeight.Bold)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(Icons.Default.EmojiEvents, null, tint = MaterialTheme.colorScheme.onTertiaryContainer)
+                                            Spacer(Modifier.width(12.dp))
+                                            Column {
+                                                Text("Pemenang Putaran", style = MaterialTheme.typography.labelSmall)
+                                                Text(winner?.member?.displayName ?: "Unknown", fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                        
+                                        IconButton(
+                                            onClick = {
+                                                val msg = "Selamat ${winner?.member?.displayName}! Anda memenangkan arisan putaran ini."
+                                                launchWhatsApp(context, winner?.member?.phoneNumber, msg)
+                                            },
+                                            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape).size(36.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.Chat, 
+                                                contentDescription = "Chat WhatsApp",
+                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                modifier = Modifier.size(18.dp)
+                                            )
                                         }
                                     }
                                 }

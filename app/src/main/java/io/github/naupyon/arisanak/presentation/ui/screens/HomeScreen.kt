@@ -90,7 +90,8 @@ fun HomeScreen(
             "Belum Bayar" -> transactionHistory.filter { it.status == PaymentState.UNPAID }
             "Angsuran" -> transactionHistory.filter { it.status == PaymentState.PARTIAL }
             "Ditalangi" -> transactionHistory.filter { it.status.name.startsWith("DITALANGI") }
-            "Hutang Talangan" -> transactionHistory.filter { it.status == PaymentState.DITALANGI_UNPAID || it.status == PaymentState.DITALANGI_PARTIAL }
+            "Talangan Lunas" -> transactionHistory.filter { it.status == PaymentState.DITALANGI_PAID }
+            "Talangan Hutang" -> transactionHistory.filter { it.status == PaymentState.DITALANGI_UNPAID || it.status == PaymentState.DITALANGI_PARTIAL }
             else -> transactionHistory
         }
     }
@@ -246,7 +247,8 @@ fun HomeScreen(
                         "Belum Bayar" to "Belum Bayar",
                         "Angsuran" to "Angsuran/Hutang",
                         "Ditalangi" to "Semua Talangan",
-                        "Hutang Talangan" to "Hutang Talangan"
+                        "Talangan Lunas" to "Talangan Lunas",
+                        "Talangan Hutang" to "Talangan Hutang"
                     )
                     items(filters) { (id, label) ->
                         FilterChip(
@@ -343,6 +345,10 @@ fun HomeScreen(
                         }
                     }
                 }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
         
