@@ -44,11 +44,11 @@ class SettingsRepositoryImpl @Inject constructor(
     override fun getPinCode(): Flow<String> = context.dataStore.data.map { it[PreferencesKeys.PIN_CODE] ?: "" }
     override suspend fun setPinCode(pin: String) { context.dataStore.edit { it[PreferencesKeys.PIN_CODE] = pin } }
 
-    private val DEFAULT_REMINDER = "Halo [NamaAnggota], sekadar mengingatkan untuk iuran arisan kelompok [NamaGrup]. Sisa tagihan Anda adalah Rp [SisaTagihan]. Terima kasih!"
+    private val DEFAULT_REMINDER = "Halo [NamaAnggota], sekadar mengingatkan untuk iuran arisan kelompok [NamaGrup]. Sisa tagihan Anda adalah Rp[SisaTagihan]. Terima kasih!"
     override fun getReminderTemplate(): Flow<String> = context.dataStore.data.map { it[PreferencesKeys.REMINDER_TEMPLATE] ?: DEFAULT_REMINDER }
     override suspend fun setReminderTemplate(template: String) { context.dataStore.edit { it[PreferencesKeys.REMINDER_TEMPLATE] = template } }
 
-    private val DEFAULT_WIN = "Selamat kepada [NamaAnggota] telah memenangkan kocokan arisan kelompok [NamaGrup] dengan total pot Rp [NominalPot]! 🎉"
+    private val DEFAULT_WIN = "Selamat kepada [NamaAnggota] telah memenangkan kocokan arisan kelompok [NamaGrup] dengan total pot Rp[NominalPot]! 🎉"
     override fun getWinTemplate(): Flow<String> = context.dataStore.data.map { it[PreferencesKeys.WIN_TEMPLATE] ?: DEFAULT_WIN }
     override suspend fun setWinTemplate(template: String) { context.dataStore.edit { it[PreferencesKeys.WIN_TEMPLATE] = template } }
 }

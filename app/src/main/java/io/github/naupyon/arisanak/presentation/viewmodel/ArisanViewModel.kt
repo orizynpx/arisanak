@@ -276,7 +276,24 @@ class ArisanViewModel @Inject constructor(
             val updatedEligible = (existingEligible + currentWinners).distinct()
             val eligibleJson = "[${updatedEligible.joinToString(",")}]"
             
-            repository.updateGroup(group.copy(eligibleKasWinnerIds = eligibleJson))
+            // Check if group was "finished" (no active interval)
+            val activeInterval = repository.getActiveIntervalForGroupOneShot(groupId)
+            if (activeInterval == null) {
+                // Reactivate group: unarchive and prepare for a new interval if it was finished
+                repository.updateGroup(group.copy(
+                    eligibleKasWinnerIds = eligibleJson,
+                    isArchived = false
+                ))
+                
+                // Create a new interval for the group to resume activity
+                repository.insertInterval(Interval(
+                    groupId = groupId,
+                    sequenceNumber = group.currentIntervalSequence,
+                    isCompleted = false
+                ))
+            } else {
+                repository.updateGroup(group.copy(eligibleKasWinnerIds = eligibleJson))
+            }
 
             repository.insertMember(Member(
                 groupId = groupId, 
@@ -284,7 +301,7 @@ class ArisanViewModel @Inject constructor(
                 displayName = name, 
                 phoneNumber = phone, 
                 customDueAmount = null,
-                startIntervalSequence = group.currentIntervalSequence
+                startIntervalSequence = if (activeInterval == null) group.currentIntervalSequence else group.currentIntervalSequence
             ))
         }
     }
