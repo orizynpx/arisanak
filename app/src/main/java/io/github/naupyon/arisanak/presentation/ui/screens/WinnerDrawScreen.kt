@@ -52,10 +52,12 @@ import androidx.compose.ui.window.Dialog
 import io.github.naupyon.arisanak.domain.model.Member
 import io.github.naupyon.arisanak.presentation.ui.components.ConfettiCanvas
 import io.github.naupyon.arisanak.presentation.ui.components.launchWhatsApp
+import io.github.naupyon.arisanak.presentation.ui.components.shareText
 import io.github.naupyon.arisanak.presentation.viewmodel.ArisanViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.random.Random
+import androidx.compose.ui.platform.LocalLocale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -189,23 +191,34 @@ fun WinnerDrawScreen(
                         Text(text = winningMemberState!!.displayName, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold), textAlign = TextAlign.Center)
                         Text(text = "Telah memenangkan Arisan kelompok ${groupState?.group?.name}", textAlign = TextAlign.Center)
                         
+                        val potValue = groupState?.targetPot ?: 0.0
+                        val template = settings?.winTemplate ?: "Selamat kepada [NamaAnggota] telah memenangkan kocokan arisan kelompok [NamaGrup] dengan total pot Rp[NominalPot]! 🎉"
+                        val msg = template
+                            .replace("[NamaAnggota]", winningMemberState!!.displayName)
+                            .replace("[NamaGrup]", groupState?.group?.name ?: "")
+                            .replace("[NominalPot]", String.format(LocalLocale.current.platformLocale, "%,.0f", potValue))
+
+                        Button(
+                            onClick = { shareText(context, msg) },
+                            shape = CircleShape,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary)
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Chat, null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Kabari Kelompok")
+                        }
+
                         if (!winningMemberState!!.phoneNumber.isNullOrBlank()) {
                             Button(
-                                onClick = {
-                                    val template = settings?.winTemplate ?: "Selamat kepada [NamaAnggota] telah memenangkan kocokan arisan kelompok [NamaGrup] dengan total pot Rp[NominalPot]! 🎉"
-                                    val potValue = groupState?.targetPot ?: 0.0
-                                    val msg = template
-                                        .replace("[NamaAnggota]", winningMemberState!!.displayName)
-                                        .replace("[NamaGrup]", groupState?.group?.name ?: "")
-                                        .replace("[NominalPot]", String.format(Locale.getDefault(), "%,.0f", potValue))
-                                    launchWhatsApp(context, winningMemberState!!.phoneNumber, msg)
-                                },
+                                onClick = { launchWhatsApp(context, winningMemberState!!.phoneNumber, msg) },
                                 shape = CircleShape,
+                                modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366), contentColor = Color.White)
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.Chat, null)
                                 Spacer(Modifier.width(8.dp))
-                                Text("Kabari di WA")
+                                Text("Kabari Pemenang secara Privat")
                             }
                         }
 
