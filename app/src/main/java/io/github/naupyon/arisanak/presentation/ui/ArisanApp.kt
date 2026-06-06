@@ -28,8 +28,8 @@ fun ArisanApp() {
     val settings by viewModel.settings.collectAsState()
 
     MyApplicationTheme(
-        darkTheme = /*settings?.isDarkMode ?:*/ false,
-        dynamicColor = /*settings?.colorMode == "Material You"*/ false
+        darkTheme = settings?.isDarkMode ?: false,
+        dynamicColor = settings?.colorMode == "Material You"
     ) {
         MaterialExpressiveTheme(
             colorScheme = MaterialTheme.colorScheme,

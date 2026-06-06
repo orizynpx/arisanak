@@ -47,17 +47,17 @@ fun ProfilSettingsScreen(
         ) {
             ProfileHeader(settings?.userName ?: "Ibu Siti") { viewModel.updateUserName(it) }
 
-//            SettingsSection("Tampilan") {
-//                ToggleSetting("Mode Gelap", settings?.isDarkMode ?: false) { viewModel.updateDarkMode(it) }
-//
-//                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-//                    Text("Warna Tema")
-//                    TextButton(onClick = { viewModel.updateColorMode(if (settings?.colorMode == "Default") "Material You" else "Default") }) {
-//                        Text(settings?.colorMode ?: "Default")
-//                    }
-//                }
-//            }
-//
+            SettingsSection("Tampilan") {
+                ToggleSetting("Mode Gelap", settings?.isDarkMode ?: false) { viewModel.updateDarkMode(it) }
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("Warna Tema")
+                    TextButton(onClick = { viewModel.updateColorMode(if (settings?.colorMode == "Default") "Material You" else "Default") }) {
+                        Text(settings?.colorMode ?: "Default")
+                    }
+                }
+            }
+
 //            SettingsSection("Bahasa") {
 //                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
 //                    Text("Bahasa Aplikasi")
